@@ -35,7 +35,7 @@ select.error {
     padding: 3px;
 }
 .card_border {
-    border-color: #b7c2d9;
+    border-color: #3782ce !important;
 }
 .text_redcolour {
     color: #ff0000;

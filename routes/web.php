@@ -158,6 +158,10 @@ Route::middleware('check.session')->group(function () {
     /********************************************************************* Create charge - URL ******************************************************************* */
 
     Route::get('/create_charge', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_charge')->defaults('viewName', 'usermanagement.createcharge');
+    Route::post('/getroletypecode_basedondept', [App\Http\Controllers\UserManagementController::class, 'getroletypecode_basedondept'])->name('UserManagementController.getroletypecode_basedondept');
+    Route::post('/getRegionDistInstBasedOnDept', [App\Http\Controllers\UserManagementController::class, 'getRegionDistInstBasedOnDept'])->name('UserManagementController.getRegionDistInstBasedOnDept');
+    Route::post('/charge_insertupdate', [App\Http\Controllers\UserManagementController::class, 'charge_insertupdate'])->name('UserManagementController.charge_insertupdate');
+    Route::post('/fetchchargeData', [App\Http\Controllers\UserManagementController::class, 'fetchchargeData'])->name('UserManagementController.fetchchargeData');
 
     /********************************************************************* Create charge - URL ******************************************************************* */
 
