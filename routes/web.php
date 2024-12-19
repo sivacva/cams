@@ -257,6 +257,9 @@ Route::post('/audit/auditee_partialchange', [App\Http\Controllers\AuditeeControl
 Route::get('/audit/audit_particulars', [App\Http\Controllers\AuditeeController::class, 'audit_particulars'])->name('audit.auditee');
 Route::post('/audit/auditee_accept', [App\Http\Controllers\AuditeeController::class, 'auditee_accept'])->name('audit.auditee');
 
+Route::get('/download-auditor-diary', [App\Http\Controllers\AuditDiaryController::class, 'downloadDiary']);
+
+
 // Route::get('/field_audit', function () {
 //     return view('fieldaudit');
 // });
