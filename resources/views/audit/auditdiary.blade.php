@@ -353,7 +353,9 @@
                 </div>
             </div>
         </div>
-
+        <div align="right" class="btn-container">
+            <a class="btn btn-primary"><i class="fa fa-download"></i>  Download Excel</a>
+        </div>
         </script>
         <script src="../assets/js/datatable/datatable-advanced.init.js"></script>
         <script src="../assets/js/jquery_3.7.1.js"></script>
