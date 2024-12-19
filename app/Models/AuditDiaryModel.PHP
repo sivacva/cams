@@ -216,7 +216,13 @@ class AuditDiaryModel extends Model
         $connection = 'pgsql'; // Name of the database connection
         $table = 'audit.trans_workallocation'; // Full table name (including schema)
 
-        $AuditDiaryDataFetch = DB::connection($connection)
+        $userdetails=self::userdetails_fetch();
+        if($userdetails)
+        {
+            $auditscheduleid = $userdetails->auditscheduleid;
+            $schteammemberid = $userdetails->schteammemberid;
+
+            $AuditDiaryDataFetch = DB::connection($connection)
                                         ->table($table)
                                         ->join('audit.mst_subworkallocationtype as b', 'audit.trans_workallocation.subtypecode', '=', 'b.subworkallocationtypeid')
                                         ->join('audit.mst_majorworkallocationtype as c', 'b.majorworkallocationtypeid', '=', 'c.majorworkallocationtypeid')
@@ -225,7 +231,13 @@ class AuditDiaryModel extends Model
                                         ->where('audiary.statusflag', '=', 'Y')
                                         ->where('b.statusflag', '=', 'Y')
                                         ->where('c.statusflag', '=', 'Y')
+                                        ->where('audit.trans_workallocation.auditscheduleid', '=', $auditscheduleid)
+                                        ->where('audit.trans_workallocation.schteammemberid', '=', $schteammemberid)
                                         ->get();
+
+        }
+
+                                        
         return $AuditDiaryDataFetch;
 
     }
@@ -249,6 +261,7 @@ class AuditDiaryModel extends Model
                                 ->join('audit.mst_auditperiod as d', 'd.auditperiodid', '=', 'ap.auditperiodid')
                                 ->where('userid', $session_userid)
                                 ->select('is.fromdate', 'is.todate', 'is.auditscheduleid','sm.auditscheduleid','sm.auditteamhead','is.auditplanid','is.fromdate','ap.instid','in.instename','incat.catename','in.mandays','sm.auditteamhead','ta.typeofauditename','d.fromyear','d.toyear','sm.schteammemberid')
+                                ->orderBy('is.fromdate', 'desc') // Sort by `fromdate` in descending order
                                 ->first();
 
             if($inst_details)
@@ -258,6 +271,37 @@ class AuditDiaryModel extends Model
             }else{
                 return false;
             }
+
+    }
+
+
+    public static function GetInstituteDetails($session_userid,$auditscheduleid)
+    {       
+        $inst_details = DB::table('audit.inst_schteammember as sm')
+                            ->join('audit.inst_auditschedule as is', 'is.auditscheduleid', '=', 'sm.auditscheduleid')
+                            ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'is.auditplanid')
+                            ->join('audit.mst_institution as in', 'in.instid', '=', 'ap.instid')
+                            ->join('audit.mst_auditeeins_category as incat', 'incat.catcode', '=', 'in.catcode')
+                            ->join('audit.mst_typeofaudit as ta', 'ta.typeofauditcode', '=', 'ap.typeofauditcode')
+                        //  ->join('audit.mst_auditperiod as d', 'd.auditperiodid', '=', 'ap.auditperiodid')
+                            ->join('audit.yearcode_mapping as yrmap', 'yrmap.auditplanid', '=', 'ap.auditplanid')
+                            ->join(
+                            'audit.mst_auditperiod as d',
+                            DB::raw('CAST(yrmap.yearselected AS INTEGER)'),
+                            '=',
+                            'd.auditperiodid'
+                        )
+                            ->where('userid', $session_userid)
+                            ->where('is.auditscheduleid', $auditscheduleid)
+                            // Apply STRING_AGG to aggregate years
+
+                            ->select( 'is.auditscheduleid','sm.auditscheduleid','sm.auditteamhead','is.auditplanid','is.fromdate','is.todate','ap.instid','in.instename','incat.catename','in.mandays','sm.auditteamhead','ta.typeofauditename','sm.schteammemberid'
+                            ,DB::raw('STRING_AGG(DISTINCT d.fromyear || \'-\' || d.toyear, \', \') as yearname') )
+                            ->groupby('is.auditscheduleid','sm.auditscheduleid','sm.auditteamhead','is.auditplanid','is.fromdate','is.todate','ap.instid','in.instename','incat.catename','in.mandays','sm.auditteamhead','ta.typeofauditename','sm.schteammemberid')
+
+                            ->first();
+
+        return $inst_details;
 
     }
 
