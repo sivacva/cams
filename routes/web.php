@@ -86,7 +86,7 @@ Route::get('/init_auditschedule', function () {
     return view('audit/initauditschedule');
 });
 
-Route::get('/district',[App\Http\Controllers\MasterController::class,'viewDistrict']);
+Route::get('/district', [App\Http\Controllers\MasterController::class, 'viewDistrict']);
 
 Route::post('/departmentSave', [App\Http\Controllers\MasterController::class, 'saveDepartment'])->name('department.save');
 Route::post('/regionSave', [App\Http\Controllers\MasterController::class, 'saveRegion'])->name('region.save');
@@ -131,56 +131,56 @@ Route::get('/dashboard_detail', [App\Http\Controllers\DashboardController::class
 // Protected User Management Routes
 Route::middleware('check.session')->group(function () {
 
-//     Route::post('/user/insert', [App\Http\Controllers\UserManagementController::class, 'storeOrUpdate'])->name('user.insert');
-//     Route::post('/user/fetchAllData', [App\Http\Controllers\UserManagementController::class, 'fetchAllData'])->name('user.fetchAllData');
-//     Route::post('/user/fetchUserData', [App\Http\Controllers\UserManagementController::class, 'fetchUserData'])->name('user.fetchUserData');
-//     Route::get('/create_user', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_user')->defaults('viewName', 'usermanagement.createuser');
-//     Route::get('/create_charge', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_charge')->defaults('viewName', 'usermanagement.createcharge');
-//     Route::get('/field_audit', action: [App\Http\Controllers\FieldAuditController::class, 'auditfield_dropdown'])->name('create_charge')->defaults('viewName', 'usermanagement.createcharge');
-//     Route::post('/getauditslip', [App\Http\Controllers\FieldAuditController::class, 'getauditslip'])->name('FiedAudit.getauditslip');
-//     Route::post('/audislip_insert', [App\Http\Controllers\FieldAuditController::class, 'audislip_insert'])->name('FiedAudit.audislip_insert');
+    //     Route::post('/user/insert', [App\Http\Controllers\UserManagementController::class, 'storeOrUpdate'])->name('user.insert');
+    //     Route::post('/user/fetchAllData', [App\Http\Controllers\UserManagementController::class, 'fetchAllData'])->name('user.fetchAllData');
+    //     Route::post('/user/fetchUserData', [App\Http\Controllers\UserManagementController::class, 'fetchUserData'])->name('user.fetchUserData');
+    //     Route::get('/create_user', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_user')->defaults('viewName', 'usermanagement.createuser');
+    //     Route::get('/create_charge', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_charge')->defaults('viewName', 'usermanagement.createcharge');
+    //     Route::get('/field_audit', action: [App\Http\Controllers\FieldAuditController::class, 'auditfield_dropdown'])->name('create_charge')->defaults('viewName', 'usermanagement.createcharge');
+    //     Route::post('/getauditslip', [App\Http\Controllers\FieldAuditController::class, 'getauditslip'])->name('FiedAudit.getauditslip');
+    //     Route::post('/audislip_insert', [App\Http\Controllers\FieldAuditController::class, 'audislip_insert'])->name('FiedAudit.audislip_insert');
 
-// Route::post('/get-auditors', [App\Http\Controllers\AuditTeam::class, 'getAuditors']);
-// Route::get('/audit_team', [App\Http\Controllers\AuditTeam::class, 'creatuser_dropdownvalues'])->name('audit_team')->defaults('viewName', 'audit.auditteam');
-// Route::post('/audit/createAuditTeam', [App\Http\Controllers\AuditTeam::class, 'createAuditTeam'])->name('audit.audit_team');
-// Route::post('/audit/fetchAllData', [App\Http\Controllers\AuditTeam::class, 'fetchAllData'])->name('audit.audit_team');
-// Route::post('/audit/fetchTeamData', [App\Http\Controllers\AuditTeam::class, 'fetchTeamData'])->name('audit.audit_team');
-/********************************************************************* Create User - URL ******************************************************************* */
+    // Route::post('/get-auditors', [App\Http\Controllers\AuditTeam::class, 'getAuditors']);
+    // Route::get('/audit_team', [App\Http\Controllers\AuditTeam::class, 'creatuser_dropdownvalues'])->name('audit_team')->defaults('viewName', 'audit.auditteam');
+    // Route::post('/audit/createAuditTeam', [App\Http\Controllers\AuditTeam::class, 'createAuditTeam'])->name('audit.audit_team');
+    // Route::post('/audit/fetchAllData', [App\Http\Controllers\AuditTeam::class, 'fetchAllData'])->name('audit.audit_team');
+    // Route::post('/audit/fetchTeamData', [App\Http\Controllers\AuditTeam::class, 'fetchTeamData'])->name('audit.audit_team');
+    /********************************************************************* Create User - URL ******************************************************************* */
 
-Route::post('/user/insert', [App\Http\Controllers\UserManagementController::class, 'storeOrUpdate'])->name('user.insert');
-Route::post('/user/fetchAllData', [App\Http\Controllers\UserManagementController::class, 'fetchAllData'])->name('user.fetchAllData');
-Route::post('/user/fetchUserData', [App\Http\Controllers\UserManagementController::class, 'fetchUserData'])->name('user.fetchUserData');
-Route::get('/create_user', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_user')->defaults('viewName', 'usermanagement.createuser');
+    Route::post('/user/insert', [App\Http\Controllers\UserManagementController::class, 'storeOrUpdate'])->name('user.insert');
+    Route::post('/user/fetchAllData', [App\Http\Controllers\UserManagementController::class, 'fetchAllData'])->name('user.fetchAllData');
+    Route::post('/user/fetchUserData', [App\Http\Controllers\UserManagementController::class, 'fetchUserData'])->name('user.fetchUserData');
+    Route::get('/create_user', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_user')->defaults('viewName', 'usermanagement.createuser');
 
-/********************************************************************* Create User - URL ******************************************************************* */
-
-
-/********************************************************************* Create charge - URL ******************************************************************* */
-
-Route::get('/create_charge', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_charge')->defaults('viewName', 'usermanagement.createcharge');
-
-/********************************************************************* Create charge - URL ******************************************************************* */
+    /********************************************************************* Create User - URL ******************************************************************* */
 
 
-/********************************************************************* Audit Team - URL ******************************************************************* */
+    /********************************************************************* Create charge - URL ******************************************************************* */
 
-Route::post('/get-auditors', [App\Http\Controllers\AuditTeam::class, 'getAuditors']);
-Route::get('/audit_team', [App\Http\Controllers\AuditTeam::class, 'creatuser_dropdownvalues'])->name('audit_team')->defaults('viewName', 'audit.auditteam');
-Route::post('/audit/createAuditTeam', [App\Http\Controllers\AuditTeam::class, 'createAuditTeam'])->name('audit.audit_team');
-Route::post('/audit/fetchAllData', [App\Http\Controllers\AuditTeam::class, 'fetchAllData'])->name('audit.audit_team');
-Route::post('/audit/fetchTeamData', [App\Http\Controllers\AuditTeam::class, 'fetchTeamData'])->name('audit.audit_team');
+    Route::get('/create_charge', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_charge')->defaults('viewName', 'usermanagement.createcharge');
 
-/********************************************************************* Audit Team - URL ******************************************************************* */
+    /********************************************************************* Create charge - URL ******************************************************************* */
 
 
-     /********************************************************************* Field Audit - URL ******************************************************************* */
+    /********************************************************************* Audit Team - URL ******************************************************************* */
+
+    Route::post('/get-auditors', [App\Http\Controllers\AuditTeam::class, 'getAuditors']);
+    Route::get('/audit_team', [App\Http\Controllers\AuditTeam::class, 'creatuser_dropdownvalues'])->name('audit_team')->defaults('viewName', 'audit.auditteam');
+    Route::post('/audit/createAuditTeam', [App\Http\Controllers\AuditTeam::class, 'createAuditTeam'])->name('audit.audit_team');
+    Route::post('/audit/fetchAllData', [App\Http\Controllers\AuditTeam::class, 'fetchAllData'])->name('audit.audit_team');
+    Route::post('/audit/fetchTeamData', [App\Http\Controllers\AuditTeam::class, 'fetchTeamData'])->name('audit.audit_team');
+
+    /********************************************************************* Audit Team - URL ******************************************************************* */
+
+
+    /********************************************************************* Field Audit - URL ******************************************************************* */
     //  Route::get('/field_audit',  [App\Http\Controllers\FieldAuditController::class, 'auditfield_dropdown'])->name('fieldaudit');
-     Route::post('/getsubobjection', [App\Http\Controllers\FieldAuditController::class, 'getsubobjection'])->name('FiedAudit.getsubobjection');
-     Route::post('/getauditslip', [App\Http\Controllers\FieldAuditController::class, 'getauditslip'])->name('FiedAudit.getauditslip');
-     Route::post('/audislip_insert', [App\Http\Controllers\FieldAuditController::class, 'audislip_insert'])->name('FiedAudit.audislip_insert');
-     Route::post('/auditeereply', [App\Http\Controllers\FieldAuditController::class, 'auditeereply'])->name('FiedAudit.auditeereply');
+    Route::post('/getsubobjection', [App\Http\Controllers\FieldAuditController::class, 'getsubobjection'])->name('FiedAudit.getsubobjection');
+    Route::post('/getauditslip', [App\Http\Controllers\FieldAuditController::class, 'getauditslip'])->name('FiedAudit.getauditslip');
+    Route::post('/audislip_insert', [App\Http\Controllers\FieldAuditController::class, 'audislip_insert'])->name('FiedAudit.audislip_insert');
+    Route::post('/auditeereply', [App\Http\Controllers\FieldAuditController::class, 'auditeereply'])->name('FiedAudit.auditeereply');
 
-     Route::post('/getviewauditslip', [App\Http\Controllers\FieldAuditController::class, 'getviewauditslip'])->name('FiedAudit.getviewauditslip');
+    Route::post('/getviewauditslip', [App\Http\Controllers\FieldAuditController::class, 'getviewauditslip'])->name('FiedAudit.getviewauditslip');
 
     // Route::get('/auditee_fieldaudit', [App\Http\Controllers\FieldAuditController::class, 'auditfield_dropdown'])
     // ->name('auditee_fieldaudit')
@@ -190,15 +190,20 @@ Route::post('/audit/fetchTeamData', [App\Http\Controllers\AuditTeam::class, 'fet
     // ->name('field_audit')
     // ->defaults('viewvalue', 'fieldaudit.fieldaudit');
     Route::get('/auditee_fieldaudit', [App\Http\Controllers\FieldAuditController::class, 'slipdetails_dropdown'])
-    ->name('slipdetails_dropdown')
-    ->defaults('viewvalue', 'fieldaudit.auditeeslip');
+        ->name('slipdetails_dropdown')
+        ->defaults('viewvalue', 'fieldaudit.auditeeslip');
+
+    Route::get('/audit_slip/{id}', [App\Http\Controllers\FieldAuditController::class, 'auditslip_dropdown'])
+        ->name('audit_slip')
+        ->defaults('viewvalue', 'fieldaudit.auditslip');
+
 
     // Route::get('/field_audit', [App\Http\Controllers\FieldAuditController::class, 'auditfield_dropdown'])
     // ->name('field_audit')
     // ->defaults('viewvalue', 'fieldaudit.fieldaudit');
     Route::get('/field_audit/{id}', [App\Http\Controllers\FieldAuditController::class, 'auditfield_dropdown'])
-    ->name('field_audit')
-    ->defaults('viewvalue', 'fieldaudit.fieldaudit');
+        ->name('field_audit')
+        ->defaults('viewvalue', 'fieldaudit.fieldaudit');
 
 
     Route::get('/init_fieldaudit', [App\Http\Controllers\FieldAuditController::class, 'init_fieldaudit'])->name('FiedAudit.init_fieldaudit');
@@ -207,17 +212,14 @@ Route::post('/audit/fetchTeamData', [App\Http\Controllers\AuditTeam::class, 'fet
 
 
     Route::post('/update_slip', [App\Http\Controllers\FieldAuditController::class, 'update_slip'])->name('FiedAudit.update_slip');
-//////workall/////
-Route::post('/fetchminorworkdel', [App\Http\Controllers\FieldAuditController::class, 'fetchminorworkdel'])->name('FiedAudit.fetchminorworkdel');
-Route::post('/insert_workAllocation', [App\Http\Controllers\FieldAuditController::class, 'insert_workAllocation'])->name('FiedAudit.insert_workAllocation');
-Route::post('/fetchAllWorkData', [App\Http\Controllers\FieldAuditController::class, 'fetchAllWorkData'])->name('FiedAudit.fetchAllWorkData');
-Route::post('/fetch_singleworkdet', [App\Http\Controllers\FieldAuditController::class, 'fetch_singleworkdet'])->name('FiedAudit.fetch_singleworkdet');
+    //////workall/////
+    Route::post('/fetchminorworkdel', [App\Http\Controllers\FieldAuditController::class, 'fetchminorworkdel'])->name('FiedAudit.fetchminorworkdel');
+    Route::post('/insert_workAllocation', [App\Http\Controllers\FieldAuditController::class, 'insert_workAllocation'])->name('FiedAudit.insert_workAllocation');
+    Route::post('/fetchAllWorkData', [App\Http\Controllers\FieldAuditController::class, 'fetchAllWorkData'])->name('FiedAudit.fetchAllWorkData');
+    Route::post('/fetch_singleworkdet', [App\Http\Controllers\FieldAuditController::class, 'fetch_singleworkdet'])->name('FiedAudit.fetch_singleworkdet');
 
-//////workall/////
- /********************************************************************* Audit Team - URL ******************************************************************* */
-
-
-
+    //////workall/////
+    /********************************************************************* Audit Team - URL ******************************************************************* */
 });
 
 Route::get('/audit_diary', function () {
@@ -298,7 +300,7 @@ Route::post('/getpendingparadetails', [App\Http\Controllers\FieldAuditController
 
 Route::get('/pendingparra', [App\Http\Controllers\FieldAuditController::class, 'pendingparra'])->name('FiedAudit.pendingparra');
 
-    
+
 Route::post('/auditdiary/fetchAllData', [App\Http\Controllers\AuditDiaryController::class, 'FetchDiarydetails'])->name('auditdiary.fetch');
 
 Route::get('/auditeelogin', function () {

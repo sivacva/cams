@@ -8,7 +8,7 @@
 
     <?php
     $instdel = json_decode($results, true);
-
+    
     if ($instdel) {
         $datashow = '';
         $nodatashow = 'hide_this';
@@ -16,7 +16,7 @@
         $datashow = 'hide_this';
         $nodatashow = '';
     }
-
+    
     ?>
 
 
@@ -48,9 +48,13 @@
                                             <td>{{ $item['formatted_todate'] }}</td>
                                             <td>
                                                 <!-- Edit Button -->
+                                                <a class="btn btn-sm btn-success"
+                                                    href="{{ route('audit_slip', ['id' => $item['encrypted_auditscheduleid']]) }}">
+                                                    Add Audit Slip</a>
                                                 <a class="btn btn-sm btn-primary"
                                                     href="{{ route('field_audit', ['id' => $item['encrypted_auditscheduleid']]) }}">View
                                                     Field Audit</a>
+
                                             </td>
                                         </tr>
                                     @endforeach

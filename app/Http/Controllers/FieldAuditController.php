@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
@@ -168,8 +169,14 @@ class FieldAuditController extends Controller
             ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'sc.auditplanid')
             ->join('audit.mst_institution as mi', 'mi.instid', '=', 'ap.instid')
             ->where('auditeeresponse', 'A')
-            ->groupBy('sc.auditscheduleid', 'ap.auditplanid', 'ap.instid', 'mi.instename','sc.fromdate',
-                'sc.todate')
+            ->groupBy(
+                'sc.auditscheduleid',
+                'ap.auditplanid',
+                'ap.instid',
+                'mi.instename',
+                'sc.fromdate',
+                'sc.todate'
+            )
             ->select(
                 'sc.auditscheduleid',
                 'sc.fromdate',
@@ -178,7 +185,7 @@ class FieldAuditController extends Controller
                 'ap.instid',
                 'mi.instename'
             )
-        ->get();
+            ->get();
         foreach ($results as $all) {
             $all->encrypted_auditscheduleid = Crypt::encryptString($all->auditscheduleid);
             $all->formatted_fromdate = Carbon::createFromFormat('Y-m-d', $all->fromdate)->format('d/m/Y');
@@ -186,93 +193,204 @@ class FieldAuditController extends Controller
         }
 
         return view('fieldaudit.init_fieldaudit', compact('results'));
-
     }
 
     public function auditfield_dropdown($encrypted_auditscheduleid)
     {
-        if($encrypted_auditscheduleid)
-        {
+        if ($encrypted_auditscheduleid) {
             $auditscheduleid = Crypt::decryptString($encrypted_auditscheduleid);
         }
         // Echo the ID to verify it's being passed correctly
-         // Access session data
-         $chargeData = session('charge');
-         $session_deptcode = $chargeData->deptcode; // Accessing the department code from the session
-         $session_usertypecode = $chargeData->usertypecode;
-         $userData = session('user');
-         $session_userid = $userData->userid;
+        // Access session data
+        $chargeData = session('charge');
+        $session_deptcode = $chargeData->deptcode; // Accessing the department code from the session
+        $session_usertypecode = $chargeData->usertypecode;
+        $userData = session('user');
+        $session_userid = $userData->userid;
 
-         $get_majorobjection = DB::table('audit.mst_mainobjection as ma')
-         ->where('ma.deptcode', $session_deptcode) // Query based on department code
-         ->where('ma.statusflag', '=', 'Y') // Filter for active or enabled records
-         ->select('ma.objectionename', 'ma.objectiontname', 'ma.mainobjectionid') // Select the necessary fields
-         ->orderBy('ma.objectionename', 'asc')
-         ->get();
+        $get_majorobjection = DB::table('audit.mst_mainobjection as ma')
+            ->where('ma.deptcode', $session_deptcode) // Query based on department code
+            ->where('ma.statusflag', '=', 'Y') // Filter for active or enabled records
+            ->select('ma.objectionename', 'ma.objectiontname', 'ma.mainobjectionid') // Select the necessary fields
+            ->orderBy('ma.objectionename', 'asc')
+            ->get();
 
-         $inst_details = DB::table('audit.inst_schteammember as sm')
-         ->join('audit.inst_auditschedule as is', 'is.auditscheduleid', '=', 'sm.auditscheduleid')
-         ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'is.auditplanid')
-         ->join('audit.mst_institution as in', 'in.instid', '=', 'ap.instid')
-         ->join('audit.mst_auditeeins_category as incat', 'incat.catcode', '=', 'in.catcode')
-         ->join('audit.mst_typeofaudit as ta', 'ta.typeofauditcode', '=', 'ap.typeofauditcode')
-        //  ->join('audit.mst_auditperiod as d', 'd.auditperiodid', '=', 'ap.auditperiodid')
-         ->join('audit.yearcode_mapping as yrmap', 'yrmap.auditplanid', '=', 'ap.auditplanid')
-         ->join(
-            'audit.mst_auditperiod as d',
-            DB::raw('CAST(yrmap.yearselected AS INTEGER)'),
-            '=',
-            'd.auditperiodid'
-        )
-         ->where('userid', $session_userid)
-         ->where('is.auditscheduleid', $auditscheduleid)
-         // Apply STRING_AGG to aggregate years
+        $inst_details = DB::table('audit.inst_schteammember as sm')
+            ->join('audit.inst_auditschedule as is', 'is.auditscheduleid', '=', 'sm.auditscheduleid')
+            ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'is.auditplanid')
+            ->join('audit.mst_institution as in', 'in.instid', '=', 'ap.instid')
+            ->join('audit.mst_auditeeins_category as incat', 'incat.catcode', '=', 'in.catcode')
+            ->join('audit.mst_typeofaudit as ta', 'ta.typeofauditcode', '=', 'ap.typeofauditcode')
+            //  ->join('audit.mst_auditperiod as d', 'd.auditperiodid', '=', 'ap.auditperiodid')
+            ->join('audit.yearcode_mapping as yrmap', 'yrmap.auditplanid', '=', 'ap.auditplanid')
+            ->join(
+                'audit.mst_auditperiod as d',
+                DB::raw('CAST(yrmap.yearselected AS INTEGER)'),
+                '=',
+                'd.auditperiodid'
+            )
+            ->where('userid', $session_userid)
+            ->where('is.auditscheduleid', $auditscheduleid)
+            // Apply STRING_AGG to aggregate years
 
-         ->select( 'is.auditscheduleid','sm.auditscheduleid','sm.auditteamhead','is.auditplanid','is.fromdate','is.todate','ap.instid','in.instename','incat.catename','in.mandays','sm.auditteamhead','ta.typeofauditename','sm.schteammemberid'
-         ,DB::raw('STRING_AGG(DISTINCT d.fromyear || \'-\' || d.toyear, \', \') as yearname') )
-         ->groupby('is.auditscheduleid','sm.auditscheduleid','sm.auditteamhead','is.auditplanid','is.fromdate','is.todate','ap.instid','in.instename','incat.catename','in.mandays','sm.auditteamhead','ta.typeofauditename','sm.schteammemberid')
+            ->select(
+                'is.auditscheduleid',
+                'sm.auditscheduleid',
+                'sm.auditteamhead',
+                'is.auditplanid',
+                'is.fromdate',
+                'is.todate',
+                'ap.instid',
+                'in.instename',
+                'incat.catename',
+                'in.mandays',
+                'sm.auditteamhead',
+                'ta.typeofauditename',
+                'sm.schteammemberid',
+                DB::raw('STRING_AGG(DISTINCT d.fromyear || \'-\' || d.toyear, \', \') as yearname')
+            )
+            ->groupby('is.auditscheduleid', 'sm.auditscheduleid', 'sm.auditteamhead', 'is.auditplanid', 'is.fromdate', 'is.todate', 'ap.instid', 'in.instename', 'incat.catename', 'in.mandays', 'sm.auditteamhead', 'ta.typeofauditename', 'sm.schteammemberid')
 
-         ->get();
-         $teammemdel = DB::table('audit.inst_schteammember as sm');
-         $teamheadid = 'N';
-         if($inst_details[0]->auditteamhead == 'N')
-         {
+            ->get();
+        $teammemdel = DB::table('audit.inst_schteammember as sm');
+        $teamheadid = 'N';
+        if ($inst_details[0]->auditteamhead == 'N') {
 
-             $teamheaddel = DB::table('audit.inst_schteammember as sm')
-                 ->where('auditscheduleid', $auditscheduleid)
-                 ->where('auditteamhead', 'Y')
-                 ->select('sm.userid')
-                 ->get();  // added 'get()' to fetch data
-             $teamheadid =   $teamheaddel[0]->userid;
-         }
-         $teammemdel = DB::table('audit.inst_schteammember as sm')
+            $teamheaddel = DB::table('audit.inst_schteammember as sm')
+                ->where('auditscheduleid', $auditscheduleid)
+                ->where('auditteamhead', 'Y')
+                ->select('sm.userid')
+                ->get();  // added 'get()' to fetch data
+            $teamheadid =   $teamheaddel[0]->userid;
+        }
+        $teammemdel = DB::table('audit.inst_schteammember as sm')
 
-         ->join('audit.userchargedetails as uc', 'sm.userid', '=', 'uc.userid')
-         ->join('audit.deptuserdetails as du', 'uc.userid', '=', 'du.deptuserid')
-         ->join('audit.chargedetails as cd', 'uc.chargeid', '=', 'cd.chargeid')
-         ->join('audit.mst_designation as de', 'de.desigcode', '=', 'du.desigcode')
-         ->where('auditscheduleid', $auditscheduleid)
-         ->where('sm.statusflag', 'Y')
-         ->select(
-             'sm.schteammemberid',
-             'sm.userid',
-             'de.desigelname',
-             'du.username',
-         )
-         ->get();
-     $majorworkdel = DB::table('audit.mst_majorworkallocationtype')
-         ->where('statusflag', 'Y')
-         ->select(
-             'mst_majorworkallocationtype.majorworkallocationtypeename',
-             'mst_majorworkallocationtype.majorworkallocationtypeid',
-         )
-         ->orderBy('mst_majorworkallocationtype.orderid', 'asc')
-         ->get();
-         // Option 1: Returning a view with the data (pass the data to the view)
+            ->join('audit.userchargedetails as uc', 'sm.userid', '=', 'uc.userid')
+            ->join('audit.deptuserdetails as du', 'uc.userid', '=', 'du.deptuserid')
+            ->join('audit.chargedetails as cd', 'uc.chargeid', '=', 'cd.chargeid')
+            ->join('audit.mst_designation as de', 'de.desigcode', '=', 'du.desigcode')
+            ->where('auditscheduleid', $auditscheduleid)
+            ->where('sm.statusflag', 'Y')
+            ->select(
+                'sm.schteammemberid',
+                'sm.userid',
+                'de.desigelname',
+                'du.username',
+            )
+            ->get();
+        $majorworkdel = DB::table('audit.mst_majorworkallocationtype')
+            ->where('statusflag', 'Y')
+            ->select(
+                'mst_majorworkallocationtype.majorworkallocationtypeename',
+                'mst_majorworkallocationtype.majorworkallocationtypeid',
+            )
+            ->orderBy('mst_majorworkallocationtype.orderid', 'asc')
+            ->get();
+        // Option 1: Returning a view with the data (pass the data to the view)
 
         // print_r($inst_details);
 
-        return view('fieldaudit.fieldaudit', compact('get_majorobjection','inst_details','teamheadid','teammemdel', 'majorworkdel'));
+        return view('fieldaudit.fieldaudit', compact('get_majorobjection', 'inst_details', 'teamheadid', 'teammemdel', 'majorworkdel'));
+
+
+        // You can also add logic to handle the ID if needed
+    }
+    public function auditslip_dropdown($encrypted_auditscheduleid)
+    {
+        if ($encrypted_auditscheduleid) {
+            $auditscheduleid = Crypt::decryptString($encrypted_auditscheduleid);
+        }
+        // Echo the ID to verify it's being passed correctly
+        // Access session data
+        $chargeData = session('charge');
+        $session_deptcode = $chargeData->deptcode; // Accessing the department code from the session
+        $session_usertypecode = $chargeData->usertypecode;
+        $userData = session('user');
+        $session_userid = $userData->userid;
+
+        $get_majorobjection = DB::table('audit.mst_mainobjection as ma')
+            ->where('ma.deptcode', $session_deptcode) // Query based on department code
+            ->where('ma.statusflag', '=', 'Y') // Filter for active or enabled records
+            ->select('ma.objectionename', 'ma.objectiontname', 'ma.mainobjectionid') // Select the necessary fields
+            ->orderBy('ma.objectionename', 'asc')
+            ->get();
+
+        $inst_details = DB::table('audit.inst_schteammember as sm')
+            ->join('audit.inst_auditschedule as is', 'is.auditscheduleid', '=', 'sm.auditscheduleid')
+            ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'is.auditplanid')
+            ->join('audit.mst_institution as in', 'in.instid', '=', 'ap.instid')
+            ->join('audit.mst_auditeeins_category as incat', 'incat.catcode', '=', 'in.catcode')
+            ->join('audit.mst_typeofaudit as ta', 'ta.typeofauditcode', '=', 'ap.typeofauditcode')
+            //  ->join('audit.mst_auditperiod as d', 'd.auditperiodid', '=', 'ap.auditperiodid')
+            ->join('audit.yearcode_mapping as yrmap', 'yrmap.auditplanid', '=', 'ap.auditplanid')
+            ->join(
+                'audit.mst_auditperiod as d',
+                DB::raw('CAST(yrmap.yearselected AS INTEGER)'),
+                '=',
+                'd.auditperiodid'
+            )
+            ->where('userid', $session_userid)
+            ->where('is.auditscheduleid', $auditscheduleid)
+            // Apply STRING_AGG to aggregate years
+
+            ->select(
+                'is.auditscheduleid',
+                'sm.auditscheduleid',
+                'sm.auditteamhead',
+                'is.auditplanid',
+                'is.fromdate',
+                'is.todate',
+                'ap.instid',
+                'in.instename',
+                'incat.catename',
+                'in.mandays',
+                'sm.auditteamhead',
+                'ta.typeofauditename',
+                'sm.schteammemberid',
+                DB::raw('STRING_AGG(DISTINCT d.fromyear || \'-\' || d.toyear, \', \') as yearname')
+            )
+            ->groupby('is.auditscheduleid', 'sm.auditscheduleid', 'sm.auditteamhead', 'is.auditplanid', 'is.fromdate', 'is.todate', 'ap.instid', 'in.instename', 'incat.catename', 'in.mandays', 'sm.auditteamhead', 'ta.typeofauditename', 'sm.schteammemberid')
+
+            ->get();
+        $teammemdel = DB::table('audit.inst_schteammember as sm');
+        $teamheadid = 'N';
+        if ($inst_details[0]->auditteamhead == 'N') {
+
+            $teamheaddel = DB::table('audit.inst_schteammember as sm')
+                ->where('auditscheduleid', $auditscheduleid)
+                ->where('auditteamhead', 'Y')
+                ->select('sm.userid')
+                ->get();  // added 'get()' to fetch data
+            $teamheadid =   $teamheaddel[0]->userid;
+        }
+        $teammemdel = DB::table('audit.inst_schteammember as sm')
+
+            ->join('audit.userchargedetails as uc', 'sm.userid', '=', 'uc.userid')
+            ->join('audit.deptuserdetails as du', 'uc.userid', '=', 'du.deptuserid')
+            ->join('audit.chargedetails as cd', 'uc.chargeid', '=', 'cd.chargeid')
+            ->join('audit.mst_designation as de', 'de.desigcode', '=', 'du.desigcode')
+            ->where('auditscheduleid', $auditscheduleid)
+            ->where('sm.statusflag', 'Y')
+            ->select(
+                'sm.schteammemberid',
+                'sm.userid',
+                'de.desigelname',
+                'du.username',
+            )
+            ->get();
+        $majorworkdel = DB::table('audit.mst_majorworkallocationtype')
+            ->where('statusflag', 'Y')
+            ->select(
+                'mst_majorworkallocationtype.majorworkallocationtypeename',
+                'mst_majorworkallocationtype.majorworkallocationtypeid',
+            )
+            ->orderBy('mst_majorworkallocationtype.orderid', 'asc')
+            ->get();
+        // Option 1: Returning a view with the data (pass the data to the view)
+
+        // print_r($inst_details);
+
+        return view('fieldaudit.auditslip', compact('get_majorobjection', 'inst_details', 'teamheadid', 'teammemdel', 'majorworkdel'));
 
 
         // You can also add logic to handle the ID if needed
@@ -393,8 +511,8 @@ class FieldAuditController extends Controller
     //         )
     //         ->get();
 
-       
-    
+
+
 
     //             $teammemdel='';
     //             $majorworkdel='';
@@ -413,23 +531,23 @@ class FieldAuditController extends Controller
 
     // }
 
-    
+
     public function slipdetails_dropdown($viewvalue)
     {
         $chargeData = session('charge');
-            $session_deptcode = $chargeData->deptcode; // Accessing the department code from the session
-            $session_usertypecode = $chargeData->usertypecode;
-            $userData = session('user');
-            $session_userid = $userData->userid;
+        $session_deptcode = $chargeData->deptcode; // Accessing the department code from the session
+        $session_usertypecode = $chargeData->usertypecode;
+        $userData = session('user');
+        $session_userid = $userData->userid;
 
-            $get_majorobjection = DB::table('audit.mst_mainobjection as ma')
+        $get_majorobjection = DB::table('audit.mst_mainobjection as ma')
             ->where('ma.deptcode', $session_deptcode) // Query based on department code
             ->where('ma.statusflag', '=', 'Y') // Filter for active or enabled records
             ->select('ma.objectionename', 'ma.objectiontname', 'ma.mainobjectionid') // Select the necessary fields
             ->orderBy('ma.objectionename', 'asc')
             ->get();
 
-                $inst_details = DB::table('audit.sliptransactiondetail as st')
+        $inst_details = DB::table('audit.sliptransactiondetail as st')
             ->join('audit.sliphistorytransactions as t', 'st.auditslipid', '=', 't.auditslipid')
             ->join('audit.trans_auditslip as ta', 'ta.auditslipid', '=', 'st.auditslipid')
             ->join('audit.inst_auditschedule as sm', 'sm.auditscheduleid', '=', 'ta.auditscheduleid')
@@ -452,7 +570,7 @@ class FieldAuditController extends Controller
                     ->where('st.forwardedtousertypecode', 'I')
                     ->orWhere(function ($query) use ($session_userid) {
                         $query->where('t.forwardedby', $session_userid)
-                                ->where('t.forwardedbyusertypecode', 'A');
+                            ->where('t.forwardedbyusertypecode', 'A');
                     });
             })
             ->select(
@@ -482,29 +600,25 @@ class FieldAuditController extends Controller
             )
             ->get();
 
-       
-    
 
-                $teammemdel='';
-                $majorworkdel='';
 
-                            $get_majorobjection = DB::table('audit.mst_mainobjection as ma')
-                    ->where('ma.deptcode', $session_deptcode) // Query based on department code
-                    ->where('ma.statusflag', '=', 'Y') // Filter for active or enabled records
-                    ->select('ma.objectionename', 'ma.objectiontname', 'ma.mainobjectionid') // Select the necessary fields
-                    ->get();
 
-                    if(count($inst_details))
-                    {
-                        $teamheadid = $inst_details[0]->userid;
+        $teammemdel = '';
+        $majorworkdel = '';
 
-                    }
-                    else $teamheadid = '';
+        $get_majorobjection = DB::table('audit.mst_mainobjection as ma')
+            ->where('ma.deptcode', $session_deptcode) // Query based on department code
+            ->where('ma.statusflag', '=', 'Y') // Filter for active or enabled records
+            ->select('ma.objectionename', 'ma.objectiontname', 'ma.mainobjectionid') // Select the necessary fields
+            ->get();
 
-                    //print_r($inst_details);
+        if (count($inst_details)) {
+            $teamheadid = $inst_details[0]->userid;
+        } else $teamheadid = '';
 
-                    return view($viewvalue, compact('get_majorobjection','inst_details','teamheadid','teammemdel', 'majorworkdel'));
+        //print_r($inst_details);
 
+        return view($viewvalue, compact('get_majorobjection', 'inst_details', 'teamheadid', 'teammemdel', 'majorworkdel'));
     }
     public function getauditslip(Request $request)
     {
@@ -519,14 +633,11 @@ class FieldAuditController extends Controller
 
         $usertypecode = $chargedel->usertypecode;
 
-        if($usertypecode  == View::shared('auditorlogin'))
-        {
+        if ($usertypecode  == View::shared('auditorlogin')) {
             $userchargeid = $chargedel->userchargeid;
             $auditteamhead = $chargedel->auditteamhead;
             $auditscheduleid        =   $request->input('auditscheduleid');
-        }
-        else if($usertypecode  == View::shared('auditeelogin'))
-        {
+        } else if ($usertypecode  == View::shared('auditeelogin')) {
             $userid = $userdel->userid;
         }
 
@@ -547,28 +658,22 @@ class FieldAuditController extends Controller
             } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
                 return response()->json(['success' => false, 'message' => 'Invalid auditslipid.'], 400);
             }
-        }
-        else    $auditslipid    =   '';
+        } else    $auditslipid    =   '';
 
         // Since 'userchargeid' is from session, no need to validate it via request
         // But ensure userchargeid exists in session
 
 
-        if($usertypecode  == View::shared('auditorlogin'))
-        {
+        if ($usertypecode  == View::shared('auditorlogin')) {
             if (!$userchargeid) {
                 return response()->json(['success' => false, 'message' => 'User ID not provided'], 400);
             }
-            $alldetails = FieldAuditModel::fetchdata($userchargeid,$auditslipid,$auditteamhead,$auditscheduleid);
+            $alldetails = FieldAuditModel::fetchdata($userchargeid, $auditslipid, $auditteamhead, $auditscheduleid);
 
             foreach ($alldetails as $all) {
                 $all->encrypted_auditslipid = Crypt::encryptString($all->auditslipid);
             }
-
-
-        }
-        else if($usertypecode  == View::shared('auditeelogin'))
-        {
+        } else if ($usertypecode  == View::shared('auditeelogin')) {
             if (!$userid) {
                 return response()->json(['success' => false, 'message' => 'User ID not provided'], 400);
             }
@@ -580,8 +685,6 @@ class FieldAuditController extends Controller
                     $all->encrypted_auditslipid = Crypt::encryptString($all->auditslipid);
                 }
             }
-
-
         }
 
 
@@ -589,7 +692,7 @@ class FieldAuditController extends Controller
         if ($alldetails->isNotEmpty()) {
             return response()->json(['success' => true, 'data' => $alldetails]);
         } else {
-           return response()->json(['success' => true, 'message' => 'No auditslips found'], 200);
+            return response()->json(['success' => true, 'message' => 'No auditslips found'], 200);
         }
     }
     public function auditeereply(Request $request, $userId = null)
@@ -606,18 +709,16 @@ class FieldAuditController extends Controller
 
         $fileUploadId   =   '';
 
-        if(($action == 'insert') || (($action == 'update') && ($request->hasFile('auditee_upload') && ($request->input('fileuploadid')) && ($request->input('fileuploadstatus') == 'Y'))  ))
-        {
+        if (($action == 'insert') || (($action == 'update') && ($request->hasFile('auditee_upload') && ($request->input('fileuploadid')) && ($request->input('fileuploadstatus') == 'Y')))) {
             // echo 'hi';
-            if(($action == 'update') && ($request->input('fileuploadstatus') == 'Y') && ($request->input('fileuploadid')))
-            {
+            if (($action == 'update') && ($request->input('fileuploadstatus') == 'Y') && ($request->input('fileuploadid'))) {
                 $fileUploadId   =   $request->input('fileuploadid');
             }
             $file = $request->file('auditee_upload');
             $destinationPath = 'uploads/slipauditor';  // Define your destination path
 
 
-            $uploadResult = $this->fileUploadService->uploadFile($file, $destinationPath,$fileUploadId);
+            $uploadResult = $this->fileUploadService->uploadFile($file, $destinationPath, $fileUploadId);
 
             if (is_array($uploadResult)) {
                 return response()->json(['errors' => $uploadResult], 400);
@@ -627,19 +728,15 @@ class FieldAuditController extends Controller
 
                 // Now, you can access the array
                 $fileUploadId = $uploadResultData['fileupload_id'];
-
             }
-        }
-        elseif(($action == 'update') && ($request->input('fileuploadstatus') == 'N') && ($request->input('fileuploadid')))
-        {
+        } elseif (($action == 'update') && ($request->input('fileuploadstatus') == 'N') && ($request->input('fileuploadid'))) {
 
             $fileUploadId   =   $request->input('fileuploadid');
         }
 
         // echo  $fileUploadId ;
 
-        if($fileUploadId)
-        {
+        if ($fileUploadId) {
             $request->validate([
                 // 'auditee_upload' => 'required',  // Optional, max length of 255
                 'auditeeremarks_append' => 'required', // Optional, max length of 255
@@ -670,10 +767,10 @@ class FieldAuditController extends Controller
 
             try {
                 // Insert or update the audit slip record
-                    $auditslipdel = FieldAuditModel::createIfNotExistsOrUpdate($data, $auditslipid);
+                $auditslipdel = FieldAuditModel::createIfNotExistsOrUpdate($data, $auditslipid);
 
-                    $auditslipnumber    =   $auditslipdel['slipnumber'];
-                    $auditslipid    =   $auditslipdel['auditslipid'];
+                $auditslipnumber    =   $auditslipdel['slipnumber'];
+                $auditslipid    =   $auditslipdel['auditslipid'];
                 // Proceed only if the audit slip was successfully created/updated
                 if ($auditslipid) {
                     // Create a relation for the file upload
@@ -688,15 +785,13 @@ class FieldAuditController extends Controller
 
 
 
-                    $slipfileuploadid = FieldAuditModel::slipfileupload($data,$auditslipid,$fileUploadId);
+                    $slipfileuploadid = FieldAuditModel::slipfileupload($data, $auditslipid, $fileUploadId);
 
-                    if ($slipfileuploadid)
-                    {
+                    if ($slipfileuploadid) {
 
                         // Logic to move to the next condition, e.g., forwarding
 
-                        if($request->input('finaliseflag') == 'Y')
-                        {
+                        if ($request->input('finaliseflag') == 'Y') {
 
                             $chargeData = session('charge');
                             $session_usertypecode = $chargeData->usertypecode; // Accessing the department code from the session
@@ -706,70 +801,66 @@ class FieldAuditController extends Controller
                             $teamheadid  =   $teamheadids[0];
 
 
-                                if ($teamheadid) {
-                                    // Handle the insertion of new transaction for the auditee
-                                    $insertdata = [
+                            if ($teamheadid) {
+                                // Handle the insertion of new transaction for the auditee
+                                $insertdata = [
+                                    'auditslipid' => $auditslipid,
+                                    'createdby' => $userid,
+                                    'createdon' => now(),
+                                    'forwardedto' => $teamheadid,
+                                    'forwardedtousertypecode' => 'A',
+                                    'updatedby' => $userid,
+                                    'updatedbyusertypecode' => $session_usertypecode,
+                                    'updatedon' => now(),
+                                ];
+
+                                $updatedata = [
+                                    'forwardedto' => $teamheadid,
+                                    'forwardedtousertypecode' => 'A',
+                                    'updatedby' => $userid,
+                                    'updatedbyusertypecode' => 'I',
+                                    'updatedon' => now(),
+                                ];
+
+                                // Insert transaction and update
+                                $transactionResult = FieldAuditModel::create_transactiondel($insertdata, $updatedata, $auditslipid);
+
+                                if ($transactionResult) {
+                                    // Insert history transaction if transaction was successful
+                                    $historyData = [
                                         'auditslipid' => $auditslipid,
-                                        'createdby' => $userid,
-                                        'createdon' =>now(),
+                                        'forwardedby' => $userid,
+                                        'forwardedbyusertypecode' => $session_usertypecode,
                                         'forwardedto' => $teamheadid,
                                         'forwardedtousertypecode' => 'A',
-                                        'updatedby' => $userid,
-                                        'updatedbyusertypecode' => $session_usertypecode,
-                                        'updatedon' => now(),
+                                        'forwardedon' => now(),
+                                        'transstatus' => 'A',
+                                        'processcode' => 'R',
                                     ];
 
-                                    $updatedata = [
-                                        'forwardedto' => $teamheadid,
-                                        'forwardedtousertypecode' => 'A',
-                                        'updatedby' => $userid,
-                                        'updatedbyusertypecode' => 'I',
-                                        'updatedon' =>now(),
-                                    ];
+                                    $historyTransaction = FieldAuditModel::insert_historytransactiondel($historyData);
 
-                                    // Insert transaction and update
-                                    $transactionResult = FieldAuditModel::create_transactiondel($insertdata, $updatedata, $auditslipid);
+                                    if ($historyTransaction) {
+                                        // Update the auditslip table after inserting history transaction
+                                        $updateData = ['processcode' => 'R', 'auditeerepliedon' => 'now()'];
+                                        $updateSlip = FieldAuditModel::update_auditsliptable($updateData, $auditslipid);
 
-                                    if ($transactionResult) {
-                                        // Insert history transaction if transaction was successful
-                                        $historyData = [
-                                            'auditslipid' => $auditslipid,
-                                            'forwardedby' => $userid,
-                                            'forwardedbyusertypecode' => $session_usertypecode,
-                                            'forwardedto' => $teamheadid,
-                                            'forwardedtousertypecode' => 'A',
-                                            'forwardedon' => now(),
-                                            'transstatus' => 'A',
-                                            'processcode' => 'R',
-                                        ];
-
-                                        $historyTransaction = FieldAuditModel::insert_historytransactiondel($historyData);
-
-                                        if ($historyTransaction) {
-                                            // Update the auditslip table after inserting history transaction
-                                            $updateData = ['processcode' => 'R','auditeerepliedon' => 'now()'];
-                                            $updateSlip = FieldAuditModel::update_auditsliptable($updateData, $auditslipid);
-
-                                            if ($updateSlip) {
-                                                //DB::commit();
-                                                return response()->json(['success' => true, 'message' => 'Audit slip forwarded to team head successfully.','data'=> $auditslipnumber ]);
-                                            } else {
-                                                throw new \Exception("Failed to update the auditslip table.");
-                                            }
+                                        if ($updateSlip) {
+                                            //DB::commit();
+                                            return response()->json(['success' => true, 'message' => 'Audit slip forwarded to team head successfully.', 'data' => $auditslipnumber]);
                                         } else {
-                                            throw new \Exception("Failed to insert history transaction.");
+                                            throw new \Exception("Failed to update the auditslip table.");
                                         }
                                     } else {
-                                        throw new \Exception("Failed to insert or update transaction.");
+                                        throw new \Exception("Failed to insert history transaction.");
                                     }
+                                } else {
+                                    throw new \Exception("Failed to insert or update transaction.");
                                 }
-
+                            }
+                        } else {
+                            return response()->json(['success' => true, 'message' => 'Audit slip Data Saved successfully.', 'data' => $auditslipnumber]);
                         }
-                        else
-                        {
-                            return response()->json(['success' => true, 'message' => 'Audit slip Data Saved successfully.','data'=> $auditslipnumber]);
-                        }
-
                     } else {
                         throw new \Exception("Failed to create file upload relation.");
                     }
@@ -781,28 +872,24 @@ class FieldAuditController extends Controller
                 // DB::rollBack();
                 return response()->json(['error' => $e->getMessage()], 400);
             }
-
-
-
         }
     }
     public function update_slip(Request $request)
     {
 
-          // Retrieve 'charge' from session
-          $chargedel = session('charge');
+        // Retrieve 'charge' from session
+        $chargedel = session('charge');
 
 
 
-          // Ensure that 'charge' exists in session and 'userchargeid' is available
-          if (!$chargedel || !isset($chargedel->userchargeid)) {
-              return response()->json(['success' => false, 'message' => 'User ID not provided'], 400);
-          }
+        // Ensure that 'charge' exists in session and 'userchargeid' is available
+        if (!$chargedel || !isset($chargedel->userchargeid)) {
+            return response()->json(['success' => false, 'message' => 'User ID not provided'], 400);
+        }
 
-          $userchargeid = $chargedel->userchargeid;
+        $userchargeid = $chargedel->userchargeid;
 
-        if($request->auditslipid)
-        {
+        if ($request->auditslipid) {
             $auditslipid = Crypt::decryptString($request->auditslipid);  // Decrypt if ID is provided
             $request->merge(['auditslipid' => $auditslipid]);
         }
@@ -815,16 +902,14 @@ class FieldAuditController extends Controller
             'updatedby'     =>  $userchargeid,
         );
 
-        try
-        {
+        try {
             $auditslipid = FieldAuditModel::createIfNotExistsOrUpdate($data, $auditslipid);
             if ($auditslipid) {
                 return response()->json(['success' => true, 'message' => 'Audit Slip Process Completed successfully.']);
             } else {
                 throw new \Exception("Failed to update the auditslip table.");
             }
-        }
-        catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json(['success' => false, 'message' => 'Invalid auditslipid.'], 400);
         }
     }
@@ -841,8 +926,7 @@ class FieldAuditController extends Controller
 
         $usertypecode = $chargedel->usertypecode;
 
-        if($usertypecode  == View::shared('auditorlogin'))
-        {
+        if ($usertypecode  == View::shared('auditorlogin')) {
             $userchargeid = $chargedel->userchargeid;
             $auditteamhead = $chargedel->auditteamhead;
             $auditscheduleid        =   $request->input('auditscheduleid');
@@ -867,8 +951,7 @@ class FieldAuditController extends Controller
             } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
                 return response()->json(['success' => false, 'message' => 'Invalid auditslipid.'], 400);
             }
-        }
-        else    $auditslipid    =   '';
+        } else    $auditslipid    =   '';
 
 
 
@@ -876,14 +959,11 @@ class FieldAuditController extends Controller
         // But ensure userchargeid exists in session
 
 
-        if($usertypecode  == View::shared('auditorlogin'))
-        {
+        if ($usertypecode  == View::shared('auditorlogin')) {
             if (!$userchargeid) {
                 return response()->json(['success' => false, 'message' => 'User ID not provided'], 400);
-
-
             }
-            $alldetails = FieldAuditModel::getviewauditslip_withreply($userchargeid,$auditslipid,$auditscheduleid,$auditteamhead );
+            $alldetails = FieldAuditModel::getviewauditslip_withreply($userchargeid, $auditslipid, $auditscheduleid, $auditteamhead);
 
             // print_r($alldetails);
             if ($alldetails['auditDetails']->isNotEmpty()) {
@@ -906,7 +986,7 @@ class FieldAuditController extends Controller
         if ($alldetails->isNotEmpty()) {
             return response()->json(['success' => true, 'data' => $alldetails]);
         } else {
-           return response()->json(['success' => true, 'message' => 'No auditslips found'], 200);
+            return response()->json(['success' => true, 'message' => 'No auditslips found'], 200);
         }
     }
 
@@ -917,7 +997,7 @@ class FieldAuditController extends Controller
 
         $action =   $request->input('action');
 
-        if($action == 'insert') $auditslipid    =   '';
+        if ($action == 'insert') $auditslipid    =   '';
         elseif (($action == 'update') && ($request->auditslipid)) {
             $auditslipid = Crypt::decryptString($request->auditslipid);  // Decrypt if ID is provided
             $request->merge(['auditslipid' => $auditslipid]);
@@ -926,16 +1006,14 @@ class FieldAuditController extends Controller
 
         $fileUploadId   =   '';
 
-        if(($action == 'insert') || (($action == 'update') && ($request->hasFile('upload_file') && ($request->input('fileuploadid')) && ($request->input('fileuploadstatus') == 'Y'))  ))
-        {
-            if(($action == 'update') && ($request->input('fileuploadstatus') == 'Y') && ($request->input('fileuploadid')))
-            {
+        if (($action == 'insert') || (($action == 'update') && ($request->hasFile('upload_file') && ($request->input('fileuploadid')) && ($request->input('fileuploadstatus') == 'Y')))) {
+            if (($action == 'update') && ($request->input('fileuploadstatus') == 'Y') && ($request->input('fileuploadid'))) {
                 $fileUploadId   =   $request->input('fileuploadid');
             }
             $file = $request->file('upload_file');
             $destinationPath = 'uploads/slipauditor';  // Define your destination path
 
-            $uploadResult = $this->fileUploadService->uploadFile($file, $destinationPath,$fileUploadId);
+            $uploadResult = $this->fileUploadService->uploadFile($file, $destinationPath, $fileUploadId);
 
             if (is_array($uploadResult)) {
                 return response()->json(['errors' => $uploadResult], 400);
@@ -945,18 +1023,14 @@ class FieldAuditController extends Controller
 
                 // Now, you can access the array
                 $fileUploadId = $uploadResultData['fileupload_id'];
-
             }
-        }
-        elseif(($action == 'update') && ($request->input('fileuploadstatus') == 'N') && ($request->input('fileuploadid')))
-        {
+        } elseif (($action == 'update') && ($request->input('fileuploadstatus') == 'N') && ($request->input('fileuploadid'))) {
 
             $fileUploadId   =   $request->input('fileuploadid');
         }
 
 
-        if($fileUploadId)
-        {
+        if ($fileUploadId) {
             // Validate the request inputs
             $request->validate([
                 'majorobjectioncode' => ['required', 'string', 'regex:/^\d+$/'], // Ensures only digits, allows leading zeros
@@ -1008,143 +1082,71 @@ class FieldAuditController extends Controller
                 $data['liabilityname'] = $request->input('liabilityname');
             }
 
-            if($action == 'insert')
-            {
+            if ($action == 'insert') {
 
-                $data ['processcode'] = 'E';
+                $data['processcode'] = 'E';
 
-                $data ['createdon'] = now();
-                $data ['createdby'] = $userchargeid;
-            }
-            elseif($action == 'update')
-            {
-                $data ['updatedon'] = now();
-                $data ['updatedby'] = $userchargeid;
+                $data['createdon'] = now();
+                $data['createdby'] = $userchargeid;
+            } elseif ($action == 'update') {
+                $data['updatedon'] = now();
+                $data['updatedby'] = $userchargeid;
             }
 
 
             // Start a transaction to ensure data consistency
-           // DB::beginTransaction();
+            // DB::beginTransaction();
 
-        try {
-            // Insert or update the audit slip record
+            try {
+                // Insert or update the audit slip record
 
                 $auditslipdel = FieldAuditModel::createIfNotExistsOrUpdate($data, $auditslipid);
 
                 $auditslipnumber    =   $auditslipdel['slipnumber'];
                 $auditslipid    =   $auditslipdel['auditslipid'];
-            // Proceed only if the audit slip was successfully created/updated
-            if ($auditslipid) {
-                // Create a relation for the file upload
-                $data = [
-                    'fileuploadid' => $fileUploadId,
-                    'auditslipid' => $auditslipid,
-                    'statusflag' => 'Y',
-                ];
+                // Proceed only if the audit slip was successfully created/updated
+                if ($auditslipid) {
+                    // Create a relation for the file upload
+                    $data = [
+                        'fileuploadid' => $fileUploadId,
+                        'auditslipid' => $auditslipid,
+                        'statusflag' => 'Y',
+                    ];
 
-                if($action == 'insert')
-                {
-                    $data ['createdon'] = now();
-                    $data ['createdby'] = $userchargeid;
-                }
-                elseif($action == 'update')
-                {
-                    $data ['updatedon'] = now();
-                    $data ['updatedby'] = $userchargeid;
-                }
+                    if ($action == 'insert') {
+                        $data['createdon'] = now();
+                        $data['createdby'] = $userchargeid;
+                    } elseif ($action == 'update') {
+                        $data['updatedon'] = now();
+                        $data['updatedby'] = $userchargeid;
+                    }
 
 
-                $slipfileuploadid = FieldAuditModel::slipfileupload($data,$auditslipid,$fileUploadId);
+                    $slipfileuploadid = FieldAuditModel::slipfileupload($data, $auditslipid, $fileUploadId);
 
-                if ($slipfileuploadid)
-                {
-                    // Logic to move to the next condition, e.g., forwarding
+                    if ($slipfileuploadid) {
+                        // Logic to move to the next condition, e.g., forwarding
 
-                    if($request->input('finaliseflag') == 'Y')
-                    {
-                        $chargeData = session('charge');
-                        $session_usertypecode = $chargeData->usertypecode; // Accessing the department code from the session
-                        $session_userchargeid = $chargeData->userchargeid;
+                        if ($request->input('finaliseflag') == 'Y') {
+                            $chargeData = session('charge');
+                            $session_usertypecode = $chargeData->usertypecode; // Accessing the department code from the session
+                            $session_userchargeid = $chargeData->userchargeid;
 
-                        if ($chargeData->auditteamhead == 'N')
-                        {
-                            $teamheadid = $request->input('teamheadid');
-                            $insertdata = [
-                                'auditslipid' => $auditslipid,
-                                'createdby' => $session_userchargeid,
-                                'createdon' => now(),
-                                'forwardedto' => $teamheadid,
-                                'forwardedtousertypecode' => 'A',
-                                'updatedby' => $session_userchargeid,
-                                'updatedbyusertypecode' => $session_usertypecode,
-                                'updatedon' => now(),
-                            ];
-
-                            // Insert transaction
-                            $transactionResult = FieldAuditModel::create_transactiondel($insertdata, '', $auditslipid);
-
-                            if ($transactionResult) {
-                                // Insert history transaction if transaction was successful
-                                $historyData = [
-                                    'auditslipid' => $auditslipid,
-                                    'forwardedby' => $session_userchargeid,
-                                    'forwardedbyusertypecode' => $session_usertypecode,
-                                    'forwardedto' => $teamheadid,
-                                    'forwardedtousertypecode' => 'A',
-                                    'forwardedon' => DB::raw('now()'),
-                                    'transstatus' => 'A',
-                                    'processcode' => 'F',
-                                ];
-
-                                $historyTransaction = FieldAuditModel::insert_historytransactiondel($historyData);
-
-                                if ($historyTransaction) {
-                                    // Update the auditslip table after inserting history transaction
-                                    $updateData = ['processcode' => 'S','forwardedby'=> $session_userchargeid,'forwardedon'=>now()];
-
-                                    $updateSlip = FieldAuditModel::update_auditsliptable($updateData, $auditslipid);
-
-                                    if ($updateSlip) {
-                                        // DB::commit();
-                                        return response()->json(['success' => true, 'message' => 'Audit slip Details Forward to Team Head successfully.','data'=>$auditslipnumber]);
-                                    } else {
-                                        throw new \Exception("Failed to update the auditslip table.");
-                                    }
-                                } else {
-                                    throw new \Exception("Failed to insert history transaction.");
-                                }
-                            } else {
-                                throw new \Exception("Failed to insert or update transaction.");
-                            }
-                        } else {
-                            // Handle the other conditions where the team head is not 'N'
-                            $instid = $request->input('instid');
-                            $auditeeuserids = FieldAuditModel::fetchdata_auditeeuserid($instid);
-                            $auditeeuserid  =   $auditeeuserids[0];
-
-                            if ($auditeeuserid) {
-                                // Handle the insertion of new transaction for the auditee
+                            if ($chargeData->auditteamhead == 'N') {
+                                $teamheadid = $request->input('teamheadid');
                                 $insertdata = [
                                     'auditslipid' => $auditslipid,
                                     'createdby' => $session_userchargeid,
-                                    'createdon' =>now(),
-                                    'forwardedto' => $auditeeuserid,
-                                    'forwardedtousertypecode' => 'I',
+                                    'createdon' => now(),
+                                    'forwardedto' => $teamheadid,
+                                    'forwardedtousertypecode' => 'A',
                                     'updatedby' => $session_userchargeid,
                                     'updatedbyusertypecode' => $session_usertypecode,
                                     'updatedon' => now(),
                                 ];
 
-                                $updatedata = [
-                                    'forwardedto' => $auditeeuserid,
-                                    'forwardedtousertypecode' => 'I',
-                                    'updatedby' => $session_userchargeid,
-                                    'updatedbyusertypecode' => 'A',
-                                    'updatedon' =>now(),
-                                ];
-
-                                // Insert transaction and update
-                                $transactionResult = FieldAuditModel::create_transactiondel($insertdata, $updatedata, $auditslipid);
+                                // Insert transaction
+                                $transactionResult = FieldAuditModel::create_transactiondel($insertdata, '', $auditslipid);
 
                                 if ($transactionResult) {
                                     // Insert history transaction if transaction was successful
@@ -1152,9 +1154,9 @@ class FieldAuditController extends Controller
                                         'auditslipid' => $auditslipid,
                                         'forwardedby' => $session_userchargeid,
                                         'forwardedbyusertypecode' => $session_usertypecode,
-                                        'forwardedto' => $auditeeuserid,
-                                        'forwardedtousertypecode' => 'I',
-                                        'forwardedon' => now(),
+                                        'forwardedto' => $teamheadid,
+                                        'forwardedtousertypecode' => 'A',
+                                        'forwardedon' => DB::raw('now()'),
                                         'transstatus' => 'A',
                                         'processcode' => 'F',
                                     ];
@@ -1163,12 +1165,13 @@ class FieldAuditController extends Controller
 
                                     if ($historyTransaction) {
                                         // Update the auditslip table after inserting history transaction
-                                        $updateData = ['processcode' => 'F','approvedon'=>now(),'approvedby'=>$session_userchargeid];
+                                        $updateData = ['processcode' => 'S', 'forwardedby' => $session_userchargeid, 'forwardedon' => now()];
+
                                         $updateSlip = FieldAuditModel::update_auditsliptable($updateData, $auditslipid);
 
                                         if ($updateSlip) {
-                                            //DB::commit();
-                                            return response()->json(['success' => true, 'message' => 'Audit Slip Forwarded to Institution successfully.','data'=>$auditslipnumber]);
+                                            // DB::commit();
+                                            return response()->json(['success' => true, 'message' => 'Audit slip Details Forward to Team Head successfully.', 'data' => $auditslipnumber]);
                                         } else {
                                             throw new \Exception("Failed to update the auditslip table.");
                                         }
@@ -1178,28 +1181,84 @@ class FieldAuditController extends Controller
                                 } else {
                                     throw new \Exception("Failed to insert or update transaction.");
                                 }
+                            } else {
+                                // Handle the other conditions where the team head is not 'N'
+                                $instid = $request->input('instid');
+                                $auditeeuserids = FieldAuditModel::fetchdata_auditeeuserid($instid);
+                                $auditeeuserid  =   $auditeeuserids[0];
+
+                                if ($auditeeuserid) {
+                                    // Handle the insertion of new transaction for the auditee
+                                    $insertdata = [
+                                        'auditslipid' => $auditslipid,
+                                        'createdby' => $session_userchargeid,
+                                        'createdon' => now(),
+                                        'forwardedto' => $auditeeuserid,
+                                        'forwardedtousertypecode' => 'I',
+                                        'updatedby' => $session_userchargeid,
+                                        'updatedbyusertypecode' => $session_usertypecode,
+                                        'updatedon' => now(),
+                                    ];
+
+                                    $updatedata = [
+                                        'forwardedto' => $auditeeuserid,
+                                        'forwardedtousertypecode' => 'I',
+                                        'updatedby' => $session_userchargeid,
+                                        'updatedbyusertypecode' => 'A',
+                                        'updatedon' => now(),
+                                    ];
+
+                                    // Insert transaction and update
+                                    $transactionResult = FieldAuditModel::create_transactiondel($insertdata, $updatedata, $auditslipid);
+
+                                    if ($transactionResult) {
+                                        // Insert history transaction if transaction was successful
+                                        $historyData = [
+                                            'auditslipid' => $auditslipid,
+                                            'forwardedby' => $session_userchargeid,
+                                            'forwardedbyusertypecode' => $session_usertypecode,
+                                            'forwardedto' => $auditeeuserid,
+                                            'forwardedtousertypecode' => 'I',
+                                            'forwardedon' => now(),
+                                            'transstatus' => 'A',
+                                            'processcode' => 'F',
+                                        ];
+
+                                        $historyTransaction = FieldAuditModel::insert_historytransactiondel($historyData);
+
+                                        if ($historyTransaction) {
+                                            // Update the auditslip table after inserting history transaction
+                                            $updateData = ['processcode' => 'F', 'approvedon' => now(), 'approvedby' => $session_userchargeid];
+                                            $updateSlip = FieldAuditModel::update_auditsliptable($updateData, $auditslipid);
+
+                                            if ($updateSlip) {
+                                                //DB::commit();
+                                                return response()->json(['success' => true, 'message' => 'Audit Slip Forwarded to Institution successfully.', 'data' => $auditslipnumber]);
+                                            } else {
+                                                throw new \Exception("Failed to update the auditslip table.");
+                                            }
+                                        } else {
+                                            throw new \Exception("Failed to insert history transaction.");
+                                        }
+                                    } else {
+                                        throw new \Exception("Failed to insert or update transaction.");
+                                    }
+                                }
                             }
+                        } else {
+                            return response()->json(['success' => true, 'message' => 'Audit slip Data Saved Successfully.', 'data' => $auditslipnumber]);
                         }
+                    } else {
+                        throw new \Exception("Failed to create file upload relation.");
                     }
-                    else
-                    {
-                        return response()->json(['success' => true, 'message' => 'Audit slip Data Saved Successfully.','data'=>$auditslipnumber]);
-                    }
-
                 } else {
-                    throw new \Exception("Failed to create file upload relation.");
+                    throw new \Exception("Failed to create or update the audit slip.");
                 }
-            } else {
-                throw new \Exception("Failed to create or update the audit slip.");
+            } catch (\Exception $e) {
+                // Rollback the transaction on failure
+                // DB::rollBack();
+                return response()->json(['error' => $e->getMessage()], 400);
             }
-        } catch (\Exception $e) {
-            // Rollback the transaction on failure
-            // DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 400);
-        }
-
-
-
         }
     }
 
@@ -1241,10 +1300,10 @@ class FieldAuditController extends Controller
 
         // Check the combination of all three fields for an existing record
         $existingUser = DB::table('users')
-                        ->where('email', $data['email'])
-                        ->where('mobilenumber', $data['mobilenumber'])
-                        ->where('ifhrmsno', $data['ifhrmsno'])
-                        ->first();
+            ->where('email', $data['email'])
+            ->where('mobilenumber', $data['mobilenumber'])
+            ->where('ifhrmsno', $data['ifhrmsno'])
+            ->first();
 
         if ($existingUser) {
             throw new Exception('The combination of email, mobile number, and IFHRMS number is already associated with a different user.');
@@ -1267,9 +1326,9 @@ class FieldAuditController extends Controller
             throw new Exception("The $field is already associated with a different user.");
         }
     }
-////////////////////////////////Work Allocation/////////////////////////////////////////////
+    ////////////////////////////////Work Allocation/////////////////////////////////////////////
 
-public function insert_workAllocation(Request $request)
+    public function insert_workAllocation(Request $request)
     {
 
 
@@ -1432,107 +1491,104 @@ public function insert_workAllocation(Request $request)
 
 
 
-public function fetchAllWorkData(Request $request)
-{
-    $TeamHead = $request['teamhead'];
-    $userid=$request['userid'];
-    $auditscheduleid = $request->auditscheduleid;
-    $workallDetail = TransWorkAllocationModel::fetchworkdetail($auditscheduleid,$TeamHead,$userid);
-    foreach ($workallDetail as $item) {
-        $item->encrypted_schteammemberid = Crypt::encryptString($item->schteammemberid);
-        $item->encrypted_workallocationid = Crypt::encryptString($item->workallocationid);
+    public function fetchAllWorkData(Request $request)
+    {
+        $TeamHead = $request['teamhead'];
+        $userid = $request['userid'];
+        $auditscheduleid = $request->auditscheduleid;
+        $workallDetail = TransWorkAllocationModel::fetchworkdetail($auditscheduleid, $TeamHead, $userid);
+        foreach ($workallDetail as $item) {
+            $item->encrypted_schteammemberid = Crypt::encryptString($item->schteammemberid);
+            $item->encrypted_workallocationid = Crypt::encryptString($item->workallocationid);
+        }
+
+        return response()->json(['data' => $workallDetail]);
     }
 
-    return response()->json(['data' => $workallDetail]);
-}
+    public function fetch_singleworkdet(Request $request)
+    {
+        $schteammemberid = Crypt::decryptString($request->schteammemberid);
+        $auditscheduleid     = $request->auditscheduleid;
+        $major_id = $request->major_id;
+        $workallDetail = TransWorkAllocationModel::fetchSingleworkdetail($schteammemberid, $auditscheduleid, $major_id);
+        foreach ($workallDetail as $item) {
+            $item->encrypted_workallocationid = Crypt::encryptString($item->workallocationid);
+        }
 
-public function fetch_singleworkdet(Request $request)
-{
-    $schteammemberid = Crypt::decryptString($request->schteammemberid);
-    $auditscheduleid     = $request->auditscheduleid;
-    $major_id = $request->major_id;
-    $workallDetail = TransWorkAllocationModel::fetchSingleworkdetail($schteammemberid, $auditscheduleid, $major_id);
-    foreach ($workallDetail as $item) {
-        $item->encrypted_workallocationid = Crypt::encryptString($item->workallocationid);
+
+        if ($workallDetail) {
+            return response()->json(['success' => true, 'data' => $workallDetail]);
+        } else {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+    }
+    public function pendingparra()
+    {
+        $results = DB::table('audit.inst_schteammember as scm')
+            ->join('audit.inst_auditschedule as sc', 'sc.auditscheduleid', '=', 'scm.auditscheduleid')
+            ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'sc.auditplanid')
+            ->join('audit.mst_institution as mi', 'mi.instid', '=', 'ap.instid')
+            ->where('auditeeresponse', 'A')
+            ->groupBy(
+                'sc.auditscheduleid',
+                'ap.auditplanid',
+                'ap.instid',
+                'mi.instename',
+                'sc.fromdate',
+                'sc.todate'
+            )
+            ->select(
+                'sc.auditscheduleid',
+                'sc.fromdate',
+                'sc.todate',
+                'ap.auditplanid',
+                'ap.instid',
+                'mi.instename'
+            )
+            ->get();
+        foreach ($results as $all) {
+            $all->encrypted_auditscheduleid = Crypt::encryptString($all->auditscheduleid);
+            $all->formatted_fromdate = Carbon::createFromFormat('Y-m-d', $all->fromdate)->format('d-m-Y');
+            $all->formatted_todate = Carbon::createFromFormat('Y-m-d', $all->todate)->format('d-m-Y');
+        }
+
+        return view('fieldaudit.pendingpara', compact('results'));
+    }
+    public function getpendingparadetails(Request $request)
+    {
+        $auditscheduleid = Crypt::decryptString($request->auditscheduleid);
+        // Sanitize and validate input
+        // $request->validate([
+        //     'auditscheduleid' => 'required|integer'
+        // ]);
+
+
+        // $auditscheduleid = $request->auditscheduleid;
+
+        // Fetch details
+        $alldetails = FieldAuditModel::getpendingparadetails($auditscheduleid);
+
+        if ($alldetails->isNotEmpty()) {
+            return response()->json(['success' => true, 'data' => $alldetails]);
+        } else {
+            return response()->json(['success' => true, 'message' => 'No auditslips found'], 200);
+        }
     }
 
+    public function fetchminorworkdel(Request $request)
+    {
 
-    if ($workallDetail) {
-        return response()->json(['success' => true, 'data' => $workallDetail]);
-    } else {
-        return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        $majorworkid = $request->majorworkid;
+        $minorworkdel = DB::table('audit.mst_subworkallocationtype')
+
+            ->where('statusflag', 'Y')
+            ->where('majorworkallocationtypeid',  $majorworkid)
+            ->select(
+                'mst_subworkallocationtype.subworkallocationtypeename',
+                'mst_subworkallocationtype.subworkallocationtypeid',
+            )
+            ->orderBy('mst_subworkallocationtype.orderid', 'asc')
+            ->get();
+        return response()->json($minorworkdel);
     }
 }
-public function pendingparra()
-{
-    $results = DB::table('audit.inst_schteammember as scm')
-        ->join('audit.inst_auditschedule as sc', 'sc.auditscheduleid', '=', 'scm.auditscheduleid')
-        ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'sc.auditplanid')
-        ->join('audit.mst_institution as mi', 'mi.instid', '=', 'ap.instid')
-        ->where('auditeeresponse', 'A')
-        ->groupBy('sc.auditscheduleid', 'ap.auditplanid', 'ap.instid', 'mi.instename','sc.fromdate',
-            'sc.todate')
-        ->select(
-            'sc.auditscheduleid',
-            'sc.fromdate',
-            'sc.todate',
-            'ap.auditplanid',
-            'ap.instid',
-            'mi.instename'
-        )
-    ->get();
-    foreach ($results as $all) {
-        $all->encrypted_auditscheduleid = Crypt::encryptString($all->auditscheduleid);
-        $all->formatted_fromdate = Carbon::createFromFormat('Y-m-d', $all->fromdate)->format('d-m-Y');
-        $all->formatted_todate = Carbon::createFromFormat('Y-m-d', $all->todate)->format('d-m-Y');
-    }
-
-    return view('fieldaudit.pendingpara', compact('results'));
-
-}
-public function getpendingparadetails(Request $request)
-{
-    $auditscheduleid = Crypt::decryptString($request->auditscheduleid);
-    // Sanitize and validate input
-    // $request->validate([
-    //     'auditscheduleid' => 'required|integer'
-    // ]);
-
-    
-    // $auditscheduleid = $request->auditscheduleid;
-
-    // Fetch details
-    $alldetails = FieldAuditModel::getpendingparadetails($auditscheduleid);
-
-    if ($alldetails->isNotEmpty()) {
-        return response()->json(['success' => true, 'data' => $alldetails]);
-    } else {
-        return response()->json(['success' => true, 'message' => 'No auditslips found'], 200);
-    }
-}
-
-public function fetchminorworkdel(Request $request)
-{
-
-    $majorworkid = $request->majorworkid;
-    $minorworkdel = DB::table('audit.mst_subworkallocationtype')
-
-        ->where('statusflag', 'Y')
-        ->where('majorworkallocationtypeid',  $majorworkid)
-        ->select(
-            'mst_subworkallocationtype.subworkallocationtypeename',
-            'mst_subworkallocationtype.subworkallocationtypeid',
-        )
-        ->orderBy('mst_subworkallocationtype.orderid', 'asc')
-        ->get();
-    return response()->json($minorworkdel);
-}
-
-
-}
-
-
-
-
-
-
