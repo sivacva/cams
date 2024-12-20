@@ -341,3 +341,8 @@ function passing_alert_value(
    return formattedDate; // Output: 14-12-2024 10:14 PM
 
  }
+
+ function makedropdownempty(id, placeholder) {
+    $("#" + id).empty();
+    $("#" + id).append("<option value=''>" + placeholder + "</option>");
+}

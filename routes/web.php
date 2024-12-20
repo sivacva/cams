@@ -161,6 +161,10 @@ Route::middleware('check.session')->group(function () {
     /********************************************************************* Create charge - URL ******************************************************************* */
 
     Route::get('/create_charge', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('create_charge')->defaults('viewName', 'usermanagement.createcharge');
+    Route::post('/getroletypecode_basedondept', [App\Http\Controllers\UserManagementController::class, 'getroletypecode_basedondept'])->name('UserManagementController.getroletypecode_basedondept');
+    Route::post('/getRegionDistInstBasedOnDept', [App\Http\Controllers\UserManagementController::class, 'getRegionDistInstBasedOnDept'])->name('UserManagementController.getRegionDistInstBasedOnDept');
+    Route::post('/charge_insertupdate', [App\Http\Controllers\UserManagementController::class, 'charge_insertupdate'])->name('UserManagementController.charge_insertupdate');
+    Route::post('/fetchchargeData', [App\Http\Controllers\UserManagementController::class, 'fetchchargeData'])->name('UserManagementController.fetchchargeData');
 
     /********************************************************************* Create charge - URL ******************************************************************* */
 
@@ -259,6 +263,16 @@ Route::post('/audit/auditee_acceptdetails', [App\Http\Controllers\AuditeeControl
 Route::post('/audit/auditee_partialchange', [App\Http\Controllers\AuditeeController::class, 'auditee_partialchange'])->name('audit.audit_datefixing');
 Route::get('/audit/audit_particulars', [App\Http\Controllers\AuditeeController::class, 'audit_particulars'])->name('audit.auditee');
 Route::post('/audit/auditee_accept', [App\Http\Controllers\AuditeeController::class, 'auditee_accept'])->name('audit.auditee');
+
+//generate-pdf
+use App\Http\Controllers\PdfController;
+Route::get('/generate-pdf', [PdfController::class, 'tamilcontentpdf']);
+Route::get('/codeofethics', [PdfController::class, 'codeofethics']);
+Route::get('/entrymeeting', [PdfController::class, 'entrymeeting']);
+Route::get('/exitmeeting', [PdfController::class, 'exitmeeting']);
+
+Route::get('/events', [App\Http\Controllers\CalendarController::class, 'getEvents']);
+Route::get('/event-details', [App\Http\Controllers\CalendarController::class, 'getEventsDetails']);
 
 Route::get('/download-auditor-diary', [App\Http\Controllers\AuditDiaryController::class, 'downloadDiary']);
 

@@ -152,7 +152,6 @@ class AuditDiaryController extends Controller
         $auditscheduleid = $workAllocation->first()->auditscheduleid;
 
         $WorkingOfficeGet=AuditDiaryModel::GetInstituteDetails($session_userid,$auditscheduleid);
-        
         // Fetch metadata
         $metaData = [
             'name' => $userData->username,  // Example dynamic name
