@@ -72,16 +72,21 @@ Route::get('/calendar', function () {
 Route::get('/list_objections', function () {
     return view('audit/listofobjections');
 });
+Route::get('/calendar', function () {
+    return view('audit/calendar');
+});
 
-
-Route::get('/view_intimation', function () {
-    return view('audit/viewintimationdetails');
+Route::get('/trans_auditslip', function () {
+    return view('audit/transauditslip');
 });
 Route::get('/auditee', function () {
     return view('audit/auditee');
 });
 Route::get('/init_auditschedule', function () {
     return view('audit/initauditschedule');
+});
+Route::get('/auditplan', function () {
+    return view('audit/auditplanning');
 });
 
 Route::get('/district', [App\Http\Controllers\MasterController::class, 'viewDistrict']);
@@ -194,6 +199,9 @@ Route::middleware('check.session')->group(function () {
 
     Route::post('/getviewauditslip', [App\Http\Controllers\FieldAuditController::class, 'getviewauditslip'])->name('FiedAudit.getviewauditslip');
 
+    Route::get('/trans_auditslip', [App\Http\Controllers\AuditSlipController::class, 'showAuditSlips']);
+
+
     // Route::get('/auditee_fieldaudit', [App\Http\Controllers\FieldAuditController::class, 'auditfield_dropdown'])
     // ->name('auditee_fieldaudit')
     // ->defaults('viewvalue', 'fieldaudit.auditeeslip');
@@ -271,7 +279,7 @@ Route::post('/audit/auditee_accept', [App\Http\Controllers\AuditeeController::cl
 
 //generate-pdf
 use App\Http\Controllers\PdfController;
-Route::get('/generate-pdf', [PdfController::class, 'tamilcontentpdf']);
+Route::get('/generate-pdf', [PdfController::class, 'previewgeneratepdf']);
 Route::get('/codeofethics', [PdfController::class, 'codeofethics']);
 Route::get('/entrymeeting', [PdfController::class, 'entrymeeting']);
 Route::get('/exitmeeting', [PdfController::class, 'exitmeeting']);

@@ -3,44 +3,55 @@
     @include('common.alert')
 
     @php
-    $sessionchargedel = session('charge'); 
-    $roleTypeCode = $sessionchargedel->roletypecode; 
-    $deptcode = $sessionchargedel->deptcode;
-    $regioncode = $sessionchargedel->regioncode;
-    $distcode = $sessionchargedel->distcode;
+        $sessionchargedel = session('charge');
+        $roleTypeCode = $sessionchargedel->roletypecode;
+        $deptcode = $sessionchargedel->deptcode;
+        $regioncode = $sessionchargedel->regioncode;
+        $distcode = $sessionchargedel->distcode;
 
+<<<<<<< HEAD
     $dga_roletypecode = $DGA_roletypecode;
     $Dist_roletypecode = $Dist_roletypecode;
     $Re_roletypecode = $Re_roletypecode;
     $Ho_roletypecode = $Ho_roletypecode;
     $Admin_roletypecode =   $Admin_roletypecode;
 
+=======
+        $dga_roletypecode = $DGA_roletypecode;
+        $Dist_roletypecode = $Dist_roletypecode;
+        $Re_roletypecode = $Re_roletypecode;
+        $Ho_roletypecode = $Ho_roletypecode;
+>>>>>>> a84c6d7a357a1adad93b23d7b2fc9a0c01308f89
 
-    $make_dept_disable = $deptcode ? 'disabled' : '';
-    $make_deptdiv_show = $deptcode ? '' : 'hide_this';
-    $make_region_disable = $regioncode ? 'disabled' : '';
-    $make_regiondiv_disable = $regioncode ? '' : 'hide_this';
-    $make_district_disable = $distcode ? 'disabled' : '';
-    $make_districtdiv_disable = $distcode ? '' : 'hide_this';
+        $make_dept_disable = $deptcode ? 'disabled' : '';
+        $make_deptdiv_show = $deptcode ? '' : 'hide_this';
+        $make_region_disable = $regioncode ? 'disabled' : '';
+        $make_regiondiv_disable = $regioncode ? '' : 'hide_this';
+        $make_district_disable = $distcode ? 'disabled' : '';
+        $make_districtdiv_disable = $distcode ? '' : 'hide_this';
 
-@endphp
+    @endphp
 
     <link rel="stylesheet" href="../assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css">
 
     <div class="row">
         <div class="col-12">
             <div class="card card_border">
-            <div class="card-header card_header_color">Create Charge</div>
+                <div class="card-header card_header_color">Create Charge</div>
                 <div class="card-body">
                     <form id="chargeform" name="chargeform">
                         <input type="hidden" name="chargeid" id="chargeid">
                         @csrf
                         <div class="row">
+<<<<<<< HEAD
                             <div class="col-md-4 mb-3" id="deptdiv">
+=======
+                            <div class="col-md-4 mb-3 " id="deptdiv">
+>>>>>>> a84c6d7a357a1adad93b23d7b2fc9a0c01308f89
                                 <label class="form-label required" for="dept">Department</label>
 
                                 <select class="form-select mr-sm-2" id="deptcode" name="deptcode"
-                                    onchange="getroletypecode_basedondept('')" <?php echo $make_dept_disable ?>>
+                                    onchange="getroletypecode_basedondept('')" <?php echo $make_dept_disable; ?>>
                                     <option value="">Select Department</option>
                                     @if (!empty($dept) && count($dept) > 0)
                                         @foreach ($dept as $department)
@@ -58,7 +69,11 @@
                             <div class="col-md-4 mb-3">
                                 <label class="form-label required" for="roletypecode">Role Type</label>
                                 <select class="form-select mr-sm-2" id="roletypecode" name="roletypecode"
+<<<<<<< HEAD
                                     onchange="settingform_basedonroletypcode('','','','','')" >
+=======
+                                    onchange="settingform_basedonroletypcode('','','','')">
+>>>>>>> a84c6d7a357a1adad93b23d7b2fc9a0c01308f89
                                     <option value=''>Select Role Type</option>
                                     @if (isset($roletype) && is_iterable($roletype))
                                         @foreach ($roletype as $role)
@@ -72,37 +87,38 @@
                             </div>
 
 
-                            <div class="col-md-4 mb-3 <?php echo $make_regiondiv_disable?>" id="regiondiv">
+                            <div class="col-md-4 mb-3 <?php echo $make_regiondiv_disable; ?>" id="regiondiv">
                                 <label class="form-label required" for="validationDefault01">Region </label>
                                 <select class="form-select mr-sm-2" id="regioncode" name="regioncode"
-                                    onchange="getvaluebasedon_regionroletype('', '', '', '', '')" <?php echo $make_region_disable ?>>
+                                    onchange="getvaluebasedon_regionroletype('', '', '', '', '')" <?php echo $make_region_disable; ?>>
                                     <option value="">Select Region</option>
 
-                                    @if($regiondetails)
-                                    {
-                                        <option value="{{ $regiondetails['regioncode'] }}" selected> 
+                                    @if ($regiondetails)
+                                        {
+                                        <option value="{{ $regiondetails['regioncode'] }}" selected>
                                             {{ $regiondetails['regionename'] }}
                                         </option>
-                                    }
+                                        }
                                     @endif
 
                                 </select>
                             </div>
-                            <div class="col-md-4 mb-3 <?php echo $make_districtdiv_disable?>" id="distdiv">
+                            <div class="col-md-4 mb-3 <?php echo $make_districtdiv_disable; ?>" id="distdiv">
                                 <label class="form-label required" for="validationDefault01">District </label>
-                                <select class="form-select mr-sm-2" id="distcode" name="distcode" 
-                                onchange="getdistregioninst_basedondept('', '', '', '', 'institution', 'instmappingcode','')" <?php echo $make_district_disable ?>>
+                                <select class="form-select mr-sm-2" id="distcode" name="distcode"
+                                    onchange="getdistregioninst_basedondept('', '', '', '', 'institution', 'instmappingcode','')"
+                                    <?php echo $make_district_disable; ?>>
                                     <option value="">Select District</option>
 
-                                    @if($distdetails)
-                                    {
-                                        <option value="{{ $distdetails['distcode'] }}" selected> 
+                                    @if ($distdetails)
+                                        {
+                                        <option value="{{ $distdetails['distcode'] }}" selected>
                                             {{ $distdetails['distename'] }}
                                         </option>
-                                    }
+                                        }
                                     @endif
 
-                                    
+
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3 hide_this" id="instdiv">
@@ -142,19 +158,18 @@
                         </div>
 
                         <!-- <div class="row">
-                            <div class="col-md-4  mx-auto">
-                                <button class="btn btn-success mt-3" type="submit"> Submit </button>
-                                <button class="btn btn-danger mt-3" type="submit"> Cancel </button>
-                            </div>
-                        </div> -->
+                                    <div class="col-md-4  mx-auto">
+                                        <button class="btn btn-success mt-3" type="submit"> Submit </button>
+                                        <button class="btn btn-danger mt-3" type="submit"> Cancel </button>
+                                    </div>
+                                </div> -->
                         <div class="row">
                             <div class="col-md-3 mx-auto">
-                                <input type="hidden" name="action" id="action"
-                                    value="insert" />
-                                <button class="btn button_save mt-3" type="submit" action="insert"
-                                    id="buttonaction" name="buttonaction">Save Draft </button>
-                                <button type="button" class="btn btn-danger mt-3"
-                                    id="reset_button" onclick="reset_form()">Clear</button>
+                                <input type="hidden" name="action" id="action" value="insert" />
+                                <button class="btn button_save mt-3" type="submit" action="insert" id="buttonaction"
+                                    name="buttonaction">Save Draft </button>
+                                <button type="button" class="btn btn-danger mt-3" id="reset_button"
+                                    onclick="reset_form()">Clear</button>
                             </div>
                         </div>
                     </form>
@@ -199,11 +214,14 @@
     <script src="../assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
 
     <script>
+<<<<<<< HEAD
 
        var session_roletypecode =   '<?php echo $roleTypeCode ?>';
 
 
 
+=======
+>>>>>>> a84c6d7a357a1adad93b23d7b2fc9a0c01308f89
         function getroletypecode_basedondept(deptcode, roletypecode) {
             const defaultOption = "<option value=''>Select Role Type</option>";
             const $dropdown = $("#roletypecode");
@@ -273,6 +291,7 @@
 
             if (!deptcode) deptcode = $('#deptcode').val();
 
+<<<<<<< HEAD
             // if ((roletypecode) && ((roletypecode == '<?php echo $Dist_roletypecode; ?>') || (roletypecode == '<?php echo $Re_roletypecode; ?>'))) 
             // {
             //     if((session_roletypecode == '<?php echo $dga_roletypecode; ?>')||(session_roletypecode == '<?php echo $Ho_roletypecode; ?>'))
@@ -280,6 +299,14 @@
             //         makedropdownempty('regioncode', 'Select Region')
             //         getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, 'region', 'regioncode')
             //         $('#regiondiv').show();
+=======
+            if ((roletypecode) && ((roletypecode == '<?php echo $Dist_roletypecode; ?>') || (roletypecode == '<?php echo $Re_roletypecode; ?>'))) {
+                makedropdownempty('instmappingcode', 'Select Insittuion')
+                $('#instdiv').show();
+                getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, 'region', 'regioncode')
+                makedropdownempty('regioncode', 'Select Region')
+                $('#regiondiv').show();
+>>>>>>> a84c6d7a357a1adad93b23d7b2fc9a0c01308f89
 
             //         makedropdownempty('instmappingcode', 'Select Insittuion')
             //         $('#instdiv').show();
@@ -378,7 +405,7 @@
             }
 
         }
-        
+
 
         function getvaluebasedon_regionroletype(roletypecode, deptcode, regioncode, distcode) {
             if (!roletypecode) roletypecode = $('#roletypecode').val();
@@ -387,17 +414,16 @@
 
 
             if (roletypecode == '<?php echo $Re_roletypecode; ?>') {
-                getdistregioninst_basedondept(roletypecode, deptcode, regioncode, '', 'institution', 'instmappingcode','')
+                getdistregioninst_basedondept(roletypecode, deptcode, regioncode, '', 'institution', 'instmappingcode', '')
             }
             if (roletypecode == '<?php echo $Dist_roletypecode; ?>') {
                 getdistregioninst_basedondept(roletypecode, deptcode, regioncode, '', 'district', 'distcode')
             }
         }
 
-        function getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, valuefor, valueforid,instmappingcode) 
-        {
-            if(valuefor == 'institution')
-            {
+        function getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, valuefor, valueforid,
+            instmappingcode) {
+            if (valuefor == 'institution') {
                 if (!roletypecode) roletypecode = $('#roletypecode').val();
                 if (!deptcode) deptcode = $('#deptcode').val();
                 if (!regioncode) regioncode = $('#regioncode').val();
@@ -529,13 +555,12 @@
             event.preventDefault();
 
             //Trigger the form validation
-            if ($("#chargeform").valid()) 
-            {
+            if ($("#chargeform").valid()) {
                 $.ajaxSetup({
-                 headers: {
-                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                     }
-                 });
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
 
                 var formData = $('#chargeform').serializeArray();
 
@@ -556,7 +581,7 @@
                             passing_alert_value('Confirmation', response.message,
                                 'confirmation_alert', 'alert_header', 'alert_body',
                                 'confirmation_alert');
-                                table.ajax.reload();
+                            table.ajax.reload();
 
                         } else if (response.error) {
                             // Handle errors if needed
@@ -579,14 +604,15 @@
                         console.error('Error details:', xhr, status, error);
                     }
                 });
-                
-                } else {
 
-                 }
+            } else {
 
-                 
+            }
+
+
         });
 
+<<<<<<< HEAD
         function reset_form() 
         {
             if (
@@ -610,6 +636,13 @@
             $('#roletypecode').val('');
             $('chargedescription').val('');
             $('desigcode').val('');
+=======
+        function reset_form() {
+            makedropdownempty('roletypecode', 'Select Role Type')
+            makedropdownempty('instmappingcode', 'Select Insittuion')
+            makedropdownempty('regioncode', 'Select Region')
+            makedropdownempty('distcode', 'Select District')
+>>>>>>> a84c6d7a357a1adad93b23d7b2fc9a0c01308f89
             $('#display_error').hide();
            
             $('#chargeform').validate().resetForm();
@@ -617,58 +650,76 @@
             updateSelectColorByValue(document.querySelectorAll(".form-select"));
         }
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             // Reset form and update select box colors on page load
             $('#chargeform')[0].reset();
             updateSelectColorByValue(document.querySelectorAll(".form-select"));
 
         });
 
-            // Initialize DataTable
-            var table = $('#chargetable').DataTable({
-                processing: true,
-                serverSide: false,
-                lengthChange: false,
-                ajax: {
-                    url: "/fetchchargeData",
-                    type: "POST",
-                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                    dataSrc: function (json) {
-                        if (json.data && json.data.length > 0) {
-                            $('#tableshow').show();
-                            $('#usertable_wrapper').show();
-                            $('#no_data').hide(); // Hide custom "No Data" message
-                            return json.data;
-                        } else {
-                            $('#tableshow').hide();
-                            $('#usertable_wrapper').hide();
-                            $('#no_data').show(); // Show custom "No Data" message
-                            return [];
-                        }
-                    },                    
+        // Initialize DataTable
+        var table = $('#chargetable').DataTable({
+            processing: true,
+            serverSide: false,
+            lengthChange: false,
+            ajax: {
+                url: "/fetchchargeData",
+                type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                columns: [
-                    {
-                        data: null,
-                        render: (_, __, ___, meta) => meta.row + 1, // Serial number column
-                        className: 'text-end' // Align to the right
-                    },
-                    { data: "deptesname" },
-                    { data: "roletypeelname" },
-                    { data: "regionename" },
-                    { data: "distename" },
-                    { data: "instename" },
-                    { data: "roleactionelname" },
-                    { data: "desigesname" },
-                    { data: "chargedescription" },
-                    {
-                        data: "encrypted_chargeid",
-                        render: (data) =>
-                            `<center>
+                dataSrc: function(json) {
+                    if (json.data && json.data.length > 0) {
+                        $('#tableshow').show();
+                        $('#usertable_wrapper').show();
+                        $('#no_data').hide(); // Hide custom "No Data" message
+                        return json.data;
+                    } else {
+                        $('#tableshow').hide();
+                        $('#usertable_wrapper').hide();
+                        $('#no_data').show(); // Show custom "No Data" message
+                        return [];
+                    }
+                },
+            },
+            columns: [{
+                    data: null,
+                    render: (_, __, ___, meta) => meta.row + 1, // Serial number column
+                    className: 'text-end' // Align to the right
+                },
+                {
+                    data: "deptesname"
+                },
+                {
+                    data: "roletypeelname"
+                },
+                {
+                    data: "regionename"
+                },
+                {
+                    data: "distename"
+                },
+                {
+                    data: "instename"
+                },
+                {
+                    data: "roleactionelname"
+                },
+                {
+                    data: "desigesname"
+                },
+                {
+                    data: "chargedescription"
+                },
+                {
+                    data: "encrypted_chargeid",
+                    render: (data) =>
+                        `<center>
                                 <a class="btn editicon editchargedel" id="${data}">
                                     <i class="ti ti-edit fs-4"></i>
                                 </a>
                             </center>`
+<<<<<<< HEAD
                     }
                 ]
             });
@@ -696,9 +747,42 @@
                             console.error('Error:', xhr.responseText || 'Unknown error');
                         }
                     });
+=======
+>>>>>>> a84c6d7a357a1adad93b23d7b2fc9a0c01308f89
                 }
-            });
-       
+            ]
+        });
+
+
+        // Handle Edit Button Click
+        $(document).on('click', '.editchargedel', function() {
+            const id = $(this).attr('id');
+            if (id) {
+                resetForm();
+                $('#chargeid').val(id);
+                $.ajax({
+                    url: '/fetchchargeData',
+                    method: 'POST',
+                    data: {
+                        chargeid: id
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            populateChargeForm(response.data[0]);
+                        } else {
+                            alert('Charge not found');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr.responseText || 'Unknown error');
+                    }
+                });
+            }
+        });
+
 
 
 
@@ -713,6 +797,7 @@
             getroletypecode_basedondept(charge.deptcode, charge.roletypecode);
             //settingform_basedonroletypcode(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode,charge.instmappingcode);
 
+<<<<<<< HEAD
             // const roletypeCodes = [`<?php echo $Re_roletypecode; ?>`, `<?php echo $Dist_roletypecode; ?>`];
             // if (roletypeCodes.includes(charge.roletypecode)) {
             //     if (charge.roletypecode === '<?php echo $Dist_roletypecode; ?>') 
@@ -721,6 +806,17 @@
             //     }
             //     getdistregioninst_basedondept(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode, 'institution', 'instmappingcode', charge.instmappingcode);
             // }
+=======
+            const roletypeCodes = [`<?php echo $Re_roletypecode; ?>`, `<?php echo $Dist_roletypecode; ?>`];
+            if (roletypeCodes.includes(charge.roletypecode)) {
+                if (charge.roletypecode === '<?php echo $Dist_roletypecode; ?>') {
+                    getdistregioninst_basedondept(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode,
+                        'district', 'distcode');
+                }
+                getdistregioninst_basedondept(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode,
+                    'institution', 'instmappingcode', charge.instmappingcode);
+            }
+>>>>>>> a84c6d7a357a1adad93b23d7b2fc9a0c01308f89
             updateSelectColorByValue(document.querySelectorAll(".form-select"));
         }
 
@@ -733,7 +829,5 @@
             change_button_as_insert('chargeform', 'action', 'buttonaction', 'display_error', '', '');
             updateSelectColorByValue(document.querySelectorAll(".form-select"));
         }
-
-
     </script>
 @endsection

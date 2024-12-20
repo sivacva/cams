@@ -184,10 +184,13 @@
             initialView: checkWidowWidth() ? "listWeek" : "dayGridMonth",
             initialDate: `${newDate.getFullYear()}-${getDynamicMonth()}-07`,
             headerToolbar: calendarHeaderToolbar,
+            validRange: {
+                start: `${newDate.getFullYear()}-${getDynamicMonth()}-01`,
+            },
             events: function (info, successCallback, failureCallback) {
                 fetchEvents().then(events => {
-                    successCallback(events);
-                }).catch(failureCallback);
+                        successCallback(events);
+                    }).catch(failureCallback);
             },
             eventClassNames: function ({ event: calendarEvent }) {
                 const getColorValue = calendarsEvents[calendarEvent._def.extendedProps.calendar];
