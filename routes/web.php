@@ -85,6 +85,9 @@ Route::get('/auditee', function () {
 Route::get('/init_auditschedule', function () {
     return view('audit/initauditschedule');
 });
+Route::get('/auditplan', function () {
+    return view('audit/auditplanning');
+});
 
 Route::get('/district', [App\Http\Controllers\MasterController::class, 'viewDistrict']);
 

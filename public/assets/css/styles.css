@@ -44276,7 +44276,17 @@ body .connect-sorting-content {
         padding-top:5vh;
     }
 }
+
 .cams_logo{
     max-width: 20%;
     height: auto;
+width:50px;
+}
+[data-layout="vertical"] body[data-sidebartype="mini-sidebar"] .cams_logo{
+    max-width: 100%;
+    height: auto;
+}
+[data-layout="vertical"] body[data-sidebartype="mini-sidebar"] .brand-logo{
+    min-height: 70px;
+    padding: 1px 7px;
 }
