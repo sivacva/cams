@@ -257,6 +257,13 @@ Route::post('/audit/auditee_partialchange', [App\Http\Controllers\AuditeeControl
 Route::get('/audit/audit_particulars', [App\Http\Controllers\AuditeeController::class, 'audit_particulars'])->name('audit.auditee');
 Route::post('/audit/auditee_accept', [App\Http\Controllers\AuditeeController::class, 'auditee_accept'])->name('audit.auditee');
 
+//generate-pdf
+use App\Http\Controllers\PdfController;
+Route::get('/generate-pdf', [PdfController::class, 'tamilcontentpdf']);
+Route::get('/codeofethics', [PdfController::class, 'codeofethics']);
+Route::get('/entrymeeting', [PdfController::class, 'entrymeeting']);
+Route::get('/exitmeeting', [PdfController::class, 'exitmeeting']);
+
 Route::get('/events', [App\Http\Controllers\CalendarController::class, 'getEvents']);
 Route::get('/event-details', [App\Http\Controllers\CalendarController::class, 'getEventsDetails']);
 

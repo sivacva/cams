@@ -314,7 +314,7 @@
                                                                                                                                                                                                                                                                                                                                 10 mb</span>-->
                                         </div>
                                         <div class="p-3 align-items-center ms-auto">
-                                            <h3 class="text-primary box mb-0" onclick="downloadFile('Entrymeeting.pdf')"> <i
+                                            <h3 class="text-primary box mb-0"  onclick="downloadFile('entrymeeting')"> <i
                                                     class="ti ti-download"></i>
                                             </h3>
                                         </div>
@@ -335,7 +335,7 @@
                                                                                                                                                                                                                                                                                                                                     10 mb</span>-->
                                         </div>
                                         <div class="p-3 align-items-center ms-auto">
-                                            <h3 class="text-primary box mb-0" onclick="downloadFile('codeofethics.pdf')">
+                                            <h3 class="text-primary box mb-0" onclick="downloadFile('codeofethics')">
                                                 <i class="ti ti-download"></i>
                                             </h3>
                                         </div>
@@ -507,7 +507,7 @@
                                                                                                                                                                                                                                                                                                                                 10 mb</span>-->
                                         </div>
                                         <div class="p-3 align-items-center ms-auto">
-                                            <h3 class="text-primary box mb-0" onclick="downloadFile('Exitmeeting.pdf')">
+                                            <h3 class="text-primary box mb-0" onclick="downloadFile('exitmeeting')">
                                                 <i class="ti ti-download"></i>
                                             </h3>
                                         </div>
@@ -2841,12 +2841,13 @@
         }
 
         /**Download PDF File */
-        function downloadFile(filename) {
-            const link = document.createElement('a');
-            link.href = '/storage/attachments/' + filename +
-                ''; // Replace with the actual path to your PDF file
-            link.download = filename; // The name that the file will have when downloaded
-            link.click();
+        function downloadFile(filename) 
+        {
+            var language = window.localStorage.getItem('lang');
+            // Add language as a query string parameter to the file URL
+            let fileWithLanguage = '/' + filename + '?lang=' + language;           
+            // Trigger download by navigating to the URL
+            window.location.href = fileWithLanguage;
         }
     </script>
 @endsection
