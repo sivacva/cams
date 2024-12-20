@@ -84,9 +84,9 @@
         }
 
         /* @font-face {
-                                                                                       font-family: 'Marutham';
-                                                                                       src: url('path/to/marutham.ttf') format('truetype');
-                                                                                       } */
+                                                                                               font-family: 'Marutham';
+                                                                                               src: url('path/to/marutham.ttf') format('truetype');
+                                                                                               } */
         .card-body {
             padding: 15px 10px;
         }
@@ -240,7 +240,7 @@
 
         #audit_tab .tab-content {
             /* color: white;
-                                                                                       background-color: #428bca; */
+                                                                                               background-color: #428bca; */
             padding: 5px 15px;
         }
 
@@ -277,6 +277,8 @@
         <div class="col-12">
             <div class="card card_border">
                 <div class="card-body">
+
+
                     <div class="row">
                         <div class="col-md-3 mb-3"> <label class="form-label required" for="validationDefault01">Institution
                                 Name</label> <input type="text" class="form-control" id="total_mandays"
@@ -425,9 +427,9 @@
                                                     </div>
                                                     <div class="row mt-2">
                                                         <!-- <div class="col-md-4">
-                                                                                                                              <label class="form-label required"  for="validationDefaultUsername">Auditable Institute Name</label>
-                                                                                                                              <input type="text" class="form-control" id="auditable_instname" name="auditable_instname" placeholder="Auditable Institute Name">
-                                                                                                                              </div> -->
+                                                                                                                                      <label class="form-label required"  for="validationDefaultUsername">Auditable Institute Name</label>
+                                                                                                                                      <input type="text" class="form-control" id="auditable_instname" name="auditable_instname" placeholder="Auditable Institute Name">
+                                                                                                                                      </div> -->
                                                         <div class="col-md-4 ">
                                                             <label class="form-label required lang"
                                                                 for="validationDefaultUsername"
@@ -678,8 +680,8 @@
                             <div class="row">
                                 <div class="col-md-1 d-none d-lg-block border-end user-chat-box">
                                     <!-- <button type="button"
-                                                                                                               class="btn btn-primary fw-semibold py-8 w-100"data-bs-toggle="modal"
-                                                                                                               data-bs-target="#compose">Audit Slip Number </button> -->
+                                                                                                                       class="btn btn-primary fw-semibold py-8 w-100"data-bs-toggle="modal"
+                                                                                                                       data-bs-target="#compose">Audit Slip Number </button> -->
                                     <div class=" pt-9 ">
                                         <div class="position-relative mb-4">
                                             <input type="text" class="form-control search-chat-view py-2 "
