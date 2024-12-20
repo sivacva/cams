@@ -51,7 +51,7 @@
                             <form id="create_auditdiary" name="create_auditdiary">
                                 @csrf
                                 @if (sizeof($Workallocated_Category) == 0)
-                                    <div id="no_data" class="hide_this" style="display: block;">
+                                    <div  class="hide_this" style="display: block;">
                                         <center>No Data Available</center>
                                     </div>
                                 @else

@@ -346,5 +346,93 @@ class PdfController extends Controller
     }
 
 
+    public function previewgeneratepdf(Request $request)
+    {
+          // Initialize mPDF
+          $mpdf = new \Mpdf\Mpdf();
+
+           // Add a page
+        $mpdf->AddPage();
+
+        // Set the border properties (e.g., color, width)
+        $mpdf->SetLineWidth(1); // Set the border width
+        $mpdf->SetDrawColor(0, 0, 0); // Set the border color (Black)
+
+        // Draw a border around the page (Rect(x, y, width, height))
+        $mpdf->Rect(10, 10, 190, 277); // (X, Y, Width, Height)
+
+          // HTML content for the PDF
+          $html = '
+              <html>
+              <head>
+                  <style>
+                      body {
+                          font-family:cursive;
+                      }
+                      .container {
+                          border: 1px solid black;
+                          padding: 20px;
+                          margin: 10px;
+                      }
+                      .header {
+                          text-align: center;
+                          font-size: 24px;
+                          font-weight: bold;
+                      }
+                      .content {
+                          font-size: 18px;
+                         text-align:center;
+
+                      }
+                      .footer {
+                          text-align: right;
+                          font-size: 14px;
+                          margin-top: 30px;
+                      }
+                  </style>
+              </head>
+              <body>
+                  <div class="container">
+                      <div class="header">
+                         ArulMigu Kapaleeshwarar temple, Mylapore, Chennai
+                      </div>
+                      <div class="content">
+                          <p>Financial Year of 2024 - 2025</p>
+                      </div>
+                  </div>
+                  <div class="part-a">
+                    <h3>PART A</h3>
+                    <ol>
+                        <li><i class="fa fa-calendar text-warning me-2"></i>Intimation Letter</li>
+                        <li><i class="fa fa-calendar text-warning me-2"></i>Entry Meeting</li>
+                        <li><i class="fa fa-file text-info me-2"></i>Code Of Ethics</li>
+                        <li><i class="fa fa-file text-info me-2"></i>Minute of Meeting</li>
+                        <li><i class="fa fa-file text-info me-2"></i>Work Allocation</li>
+                        <li><i class="fa fa-file text-info me-2"></i>Exit Meeting</li>
+                    </ol>
+                </div>
+
+              </body>
+              </html>
+          ';
+  
+          // Write the HTML content to mPDF
+          $mpdf->WriteHTML($html);
+
+        $pdfContent = $mpdf->Output('', 'S');
+
+
+        // Output the PDF to the browser
+        //return $mpdf->Output('tamil_pdf_example.pdf', 'I');
+
+         // Return Base64 encoded PDF
+         return response()->json([
+            'status' => 'success',
+            'pdf' => base64_encode($pdfContent),
+        ]);
+    
+    }
+
+
     
 }
