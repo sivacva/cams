@@ -518,4 +518,154 @@ class InstAuditscheduleModel extends Model
             ->get();
     }
 
+    public static function fetchAuditScheduleDetailsDeptUsers($deptuserid)
+    {
+        return self::query()
+            // Join statements
+            ->join('audit.inst_schteammember as inm', 'inm.auditscheduleid', '=', 'inst_auditschedule.auditscheduleid')
+            ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'inst_auditschedule.auditplanid')
+            ->join('audit.auditplanteam as at', 'ap.auditteamid', '=', 'at.auditplanteamid')
+            ->join('audit.mst_institution as ai', 'ai.instid', '=', 'ap.instid')
+            ->join('audit.mst_typeofaudit as mst', 'mst.typeofauditcode', '=', 'ap.typeofauditcode')
+            ->join('audit.mst_dept as msd', 'msd.deptcode', '=', 'ai.deptcode')
+            ->join('audit.mst_auditeeins_category as mac', 'mac.catcode', '=', 'ai.catcode')
+            ->join('audit.mst_auditquarter as maq', 'maq.auditquartercode', '=', 'ap.auditquartercode')
+            ->join('audit.userchargedetails as uc', 'uc.userchargeid', '=', 'inm.userid')
+            ->join('audit.deptuserdetails as du', 'uc.userid', '=', 'du.deptuserid')
+            ->join('audit.chargedetails as cd', 'uc.chargeid', '=', 'cd.chargeid')
+            ->join('audit.mst_designation as de', 'de.desigcode', '=', 'du.desigcode')
+            ->join('audit.yearcode_mapping as yrmap', 'yrmap.auditplanid', '=', 'ap.auditplanid')
+            ->join('audit.mst_auditperiod as period', DB::raw('CAST(yrmap.yearselected AS INTEGER)'), '=', 'period.auditperiodid')
+            
+            // Where conditions
+            ->where('du.deptuserid', '=', $deptuserid) // Filter by deptuserid
+            ->where('inm.statusflag', '=', 'Y') // Filter by statusflag = 'Y'
+            
+            // Select columns
+            ->select(
+                'inst_auditschedule.auditscheduleid',
+                'inst_auditschedule.fromdate',
+                'inst_auditschedule.todate',
+                'inst_auditschedule.auditeeresponse',
+                'inm.userid',
+                'du.username',
+                'ai.instename',
+                'ai.deptcode',
+                'ai.instid',
+                'ap.auditteamid',
+                'ap.auditplanid',
+                'at.teamname',
+                'mst.typeofauditename',
+                'msd.deptesname',
+                'mac.catename',
+                'maq.auditquarter',
+                'ap.statusflag',
+                'cd.chargedescription',
+                'de.desigelname',
+                'inm.auditteamhead',
+                DB::raw('STRING_AGG(period.fromyear || \'-\' || period.toyear, \', \') as yearname')
+            )
+            
+            // Group by clause
+            ->groupBy(
+                'inst_auditschedule.auditscheduleid',
+                'inst_auditschedule.fromdate',
+                'inst_auditschedule.todate',
+                'inst_auditschedule.auditeeresponse',
+                'inm.userid',
+                'du.username',
+                'ai.instename',
+                'ai.deptcode',
+                'ai.instid',
+                'ap.auditteamid',
+                'ap.auditplanid',
+                'at.teamname',
+                'mst.typeofauditename',
+                'msd.deptesname',
+                'mac.catename',
+                'maq.auditquarter',
+                'ap.statusflag',
+                'cd.chargedescription',
+                'de.desigelname',
+                'inm.auditteamhead'
+            )
+            ->get(); // Execute the query
+    }
+
+
+    public static function GetSchedultedEventDetails($scheduleid)
+    {
+        return self::query()
+        // Join statements
+        ->join('audit.inst_schteammember as inm', 'inm.auditscheduleid', '=', 'inst_auditschedule.auditscheduleid')
+        ->join('audit.auditplan as ap', 'ap.auditplanid', '=', 'inst_auditschedule.auditplanid')
+        ->join('audit.auditplanteam as at', 'ap.auditteamid', '=', 'at.auditplanteamid')
+        ->join('audit.mst_institution as ai', 'ai.instid', '=', 'ap.instid')
+        ->join('audit.mst_typeofaudit as mst', 'mst.typeofauditcode', '=', 'ap.typeofauditcode')
+        ->join('audit.mst_dept as msd', 'msd.deptcode', '=', 'ai.deptcode')
+        ->join('audit.mst_auditeeins_category as mac', 'mac.catcode', '=', 'ai.catcode')
+        ->join('audit.mst_auditquarter as maq', 'maq.auditquartercode', '=', 'ap.auditquartercode')
+        ->join('audit.userchargedetails as uc', 'uc.userchargeid', '=', 'inm.userid')
+        ->join('audit.deptuserdetails as du', 'uc.userid', '=', 'du.deptuserid')
+        ->join('audit.chargedetails as cd', 'uc.chargeid', '=', 'cd.chargeid')
+        ->join('audit.mst_designation as de', 'de.desigcode', '=', 'du.desigcode')
+        ->join('audit.yearcode_mapping as yrmap', 'yrmap.auditplanid', '=', 'ap.auditplanid')
+        ->join('audit.mst_auditperiod as period', DB::raw('CAST(yrmap.yearselected AS INTEGER)'), '=', 'period.auditperiodid')
+        
+        // Where conditions
+        ->where('inst_auditschedule.auditscheduleid', '=', $scheduleid) // Filter by deptuserid
+        ->where('inm.statusflag', '=', 'Y') // Filter by statusflag = 'Y'
+        
+        // Select columns
+        ->select(
+            'inst_auditschedule.auditscheduleid',
+            'inst_auditschedule.fromdate',
+            'inst_auditschedule.todate',
+            'inst_auditschedule.auditeeresponse',
+            'inm.userid',
+            'du.username',
+            'ai.instename',
+            'ai.deptcode',
+            'ai.instid',
+            'ap.auditteamid',
+            'ap.auditplanid',
+            'at.teamname',
+            'mst.typeofauditename',
+            'msd.deptesname',
+            'mac.catename',
+            'maq.auditquarter',
+            'ap.statusflag',
+            'cd.chargedescription',
+            'de.desigelname',
+            'inm.auditteamhead',
+            DB::raw('STRING_AGG(period.fromyear || \'-\' || period.toyear, \', \') as yearname')
+        )
+        
+        // Group by clause
+        ->groupBy(
+            'inst_auditschedule.auditscheduleid',
+            'inst_auditschedule.fromdate',
+            'inst_auditschedule.todate',
+            'inst_auditschedule.auditeeresponse',
+            'inm.userid',
+            'du.username',
+            'ai.instename',
+            'ai.deptcode',
+            'ai.instid',
+            'ap.auditteamid',
+            'ap.auditplanid',
+            'at.teamname',
+            'mst.typeofauditename',
+            'msd.deptesname',
+            'mac.catename',
+            'maq.auditquarter',
+            'ap.statusflag',
+            'cd.chargedescription',
+            'de.desigelname',
+            'inm.auditteamhead'
+        )
+        ->first(); // Execute the query
+
+    }
+
 }

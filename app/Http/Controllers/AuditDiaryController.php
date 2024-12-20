@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Crypt;
 use App\Models\AuditDiaryModel;
+use App\Exports\AuditorDiaryExport;
+use App\Models\InstAuditscheduleModel;
+use Maatwebsite\Excel\Facades\Excel; // Correct import for the Excel facade
 
 use Illuminate\Http\Request;
 use DataTables;
@@ -131,5 +134,90 @@ class AuditDiaryController extends Controller
 
 
     }
+
+    public function downloadDiary()
+    {
+        $chargeData = session('charge');
+        $userData = session('user');
+        $session_userid = $userData->userid;
+        //$workAllocation = AuditDiaryModel::Fetch_Cat_subCat();
+        $workAllocation = AuditDiaryModel::DiaryFetchData();
+        $fromdates = $workAllocation->pluck('fromdate');
+        $subworkname=$workAllocation->pluck('subworkallocationtypeename');
+        $combined = $fromdates->combine($subworkname);
+
+        $lowestDate = $fromdates->min();
+        $highestDate = $fromdates->max();
+
+        $auditscheduleid = $workAllocation->first()->auditscheduleid;
+
+        $WorkingOfficeGet=AuditDiaryModel::GetInstituteDetails($session_userid,$auditscheduleid);
+        // Fetch metadata
+        $metaData = [
+            'name' => $userData->username,  // Example dynamic name
+            'designation' =>$chargeData->desigelname,  // Example dynamic designation
+            'working_office' =>$WorkingOfficeGet->instename, 
+        ];
+
+        // Generate calendar data for December 2024
+        $calendarData = [];
+        $start_date = new \DateTime($lowestDate);
+        $end_date = new \DateTime($highestDate);
+
+        while ($start_date <= $end_date) {
+            $current_date = $start_date->format('Y-m-d');
+            $day = $start_date->format('l');
+            $details = '';
+        
+            // Check if the current date exists in the $combined array
+            if (array_key_exists($current_date, $combined->toArray())) {
+                $details = $combined[$current_date]; // Get subwork name for the date
+            } elseif (in_array($day, ['Sunday', 'Saturday'])) {
+                $details = 'Government Holiday';
+            }
+        
+            // Add to calendar data
+            $calendarData[] = [
+                'date' => $start_date->format('d-m-Y'),
+                'day' => $day,
+                'details' => $details,
+            ];
+        
+            // Increment the date
+            $start_date->modify('+1 day');
+        }
+
+        // Get unique catworkname values
+        $uniqueCatworkname = $workAllocation->pluck('majorworkallocationtypeename')->unique()->values()->all();
+
+        // Initialize summaryData array
+        $summaryData = [];
+
+        // Loop through unique catworkname values to create 'Category Audit Duty' rows
+        foreach ($uniqueCatworkname as $index => $name) {
+            $summaryData[] = [
+                'gist' => 'Category' . ($index + 1) . ' (' . $name . ') *',
+                'total_days' => $fromdates->count(),
+            ];
+        }
+
+        // Add fixed rows to the summaryData
+        $fixedRows = [
+            ['gist' => 'Staff Meeting', 'total_days' => ''],
+            ['gist' => 'Casual Leave', 'total_days' => ''],
+            ['gist' => 'Government Holidays', 'total_days' => ''],
+            ['gist' => 'Loss of Pay', 'total_days' => ''],
+            ['gist' => 'Total', 'total_days' => ''],
+        ];
+
+        $summaryData = array_merge($summaryData, $fixedRows);
+
+        // Pass data to the export class and download
+        return Excel::download(
+            new AuditorDiaryExport($metaData, $calendarData, $summaryData),
+            'Auditor_Diary_December_2024.xlsx'
+        );
+    }
+
 
 }

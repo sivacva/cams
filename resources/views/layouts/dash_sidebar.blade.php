@@ -27,11 +27,12 @@ $parentMenus = DB::table('audit.mst_menu as m1')
 
 
 <aside class="left-sidebar with-vertical" style="background-color: #3782ce;  height: 100%; position: fixed; ">
+    {{-- <img src="{{ asset('site/image/tn__logo.png') }}" class="cams_logo ms-2 me-3">
+    <b class="text-white h4"> CAMS </b> --}}
     <div>
-        <div class="brand-logo d-flex align-items-center justify-content-between">
-            <a href="#" class="text-nowrap logo-img">
-                <b> CAMS </b>
-            </a>
+        <div class="brand-logo d-flex align-items-center ">
+            <img src="{{ asset('site/image/tn__logo.png') }}" class="cams_logo ms-2 me-3">
+            <b class="text-white h4"> CAMS </b>
             <a href="javascript:void(0)" class="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none">
                 <i class="ti ti-x"></i>
             </a>

@@ -4,26 +4,26 @@
     <?php
     $instdel = json_decode($inst_details, true);
     $getmajorobjection = json_decode($get_majorobjection, true);
-    
+
     $teamhead = $instdel[0]['auditteamhead'];
     $instid = $instdel[0]['instid'];
     // $teamheadid = $teamheadid;
     $auditscheduleid = $instdel[0]['auditscheduleid'];
     $schteammemberid = $instdel[0]['schteammemberid'];
     $auditplanid = $instdel[0]['auditplanid'];
-    
+
     if ($teamhead == 'Y') {
         $buttonname = 'Approve';
     } else {
         $buttonname = 'Forward';
     }
-    
+
     $entry_show_first_tab = '';
     $audit_show_first_tab = '';
     $show_tab = '';
     $entrytab = '';
     $worktab = '';
-    
+
     if ($teamhead == 'Y') {
         // $workallocationslip = '2';
         $auditslip = '3';
@@ -84,9 +84,9 @@
         }
 
         /* @font-face {
-                                                                                           font-family: 'Marutham';
-                                                                                           src: url('path/to/marutham.ttf') format('truetype');
-                                                                                           } */
+                                                                                       font-family: 'Marutham';
+                                                                                       src: url('path/to/marutham.ttf') format('truetype');
+                                                                                       } */
         .card-body {
             padding: 15px 10px;
         }
@@ -240,7 +240,7 @@
 
         #audit_tab .tab-content {
             /* color: white;
-                                                                                           background-color: #428bca; */
+                                                                                       background-color: #428bca; */
             padding: 5px 15px;
         }
 
@@ -425,9 +425,9 @@
                                                     </div>
                                                     <div class="row mt-2">
                                                         <!-- <div class="col-md-4">
-                                                                                                                                  <label class="form-label required"  for="validationDefaultUsername">Auditable Institute Name</label>
-                                                                                                                                  <input type="text" class="form-control" id="auditable_instname" name="auditable_instname" placeholder="Auditable Institute Name">
-                                                                                                                                  </div> -->
+                                                                                                                              <label class="form-label required"  for="validationDefaultUsername">Auditable Institute Name</label>
+                                                                                                                              <input type="text" class="form-control" id="auditable_instname" name="auditable_instname" placeholder="Auditable Institute Name">
+                                                                                                                              </div> -->
                                                         <div class="col-md-4 ">
                                                             <label class="form-label required lang"
                                                                 for="validationDefaultUsername"
@@ -678,8 +678,8 @@
                             <div class="row">
                                 <div class="col-md-1 d-none d-lg-block border-end user-chat-box">
                                     <!-- <button type="button"
-                                                                                                                   class="btn btn-primary fw-semibold py-8 w-100"data-bs-toggle="modal"
-                                                                                                                   data-bs-target="#compose">Audit Slip Number </button> -->
+                                                                                                               class="btn btn-primary fw-semibold py-8 w-100"data-bs-toggle="modal"
+                                                                                                               data-bs-target="#compose">Audit Slip Number </button> -->
                                     <div class=" pt-9 ">
                                         <div class="position-relative mb-4">
                                             <input type="text" class="form-control search-chat-view py-2 "
