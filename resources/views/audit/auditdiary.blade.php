@@ -354,7 +354,7 @@
             </div>
         </div>
         <div align="right" class="btn-container">
-            <a href="{{ url('/download-auditor-diary') }}" class="btn btn-primary"><i class="fa fa-download"></i>  Download Excel</a>
+            <a href="{{ url('/download-auditor-diary') }}" class="btn btn-primary"><i class="fa fa-download"></i>  Download excel</a>
         </div>
 
         </script>
