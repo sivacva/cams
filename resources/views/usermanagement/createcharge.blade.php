@@ -13,6 +13,8 @@
     $Dist_roletypecode = $Dist_roletypecode;
     $Re_roletypecode = $Re_roletypecode;
     $Ho_roletypecode = $Ho_roletypecode;
+    $Admin_roletypecode =   $Admin_roletypecode;
+
 
     $make_dept_disable = $deptcode ? 'disabled' : '';
     $make_deptdiv_show = $deptcode ? '' : 'hide_this';
@@ -34,7 +36,7 @@
                         <input type="hidden" name="chargeid" id="chargeid">
                         @csrf
                         <div class="row">
-                            <div class="col-md-4 mb-3 <?php echo $make_deptdiv_show?>" id="deptdiv">
+                            <div class="col-md-4 mb-3" id="deptdiv">
                                 <label class="form-label required" for="dept">Department</label>
 
                                 <select class="form-select mr-sm-2" id="deptcode" name="deptcode"
@@ -56,7 +58,7 @@
                             <div class="col-md-4 mb-3">
                                 <label class="form-label required" for="roletypecode">Role Type</label>
                                 <select class="form-select mr-sm-2" id="roletypecode" name="roletypecode"
-                                    onchange="settingform_basedonroletypcode('','','','')" >
+                                    onchange="settingform_basedonroletypcode('','','','','')" >
                                     <option value=''>Select Role Type</option>
                                     @if (isset($roletype) && is_iterable($roletype))
                                         @foreach ($roletype as $role)
@@ -198,6 +200,10 @@
 
     <script>
 
+       var session_roletypecode =   '<?php echo $roleTypeCode ?>';
+
+
+
         function getroletypecode_basedondept(deptcode, roletypecode) {
             const defaultOption = "<option value=''>Select Role Type</option>";
             const $dropdown = $("#roletypecode");
@@ -214,6 +220,7 @@
                     type: 'POST',
                     data: {
                         deptcode: deptcode,
+                        'page'  :   'createcharge',
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
@@ -254,39 +261,122 @@
                             'alert_header', 'alert_body', 'confirmation_alert');
                     }
                 });
+                
             } else {
                 // Reset to default option if no department code is provided
                 $dropdown.html(defaultOption);
             }
         }
 
-        function settingform_basedonroletypcode(roletypecode, deptcode, regioncode, distcode) {
+        function settingform_basedonroletypcode(roletypecode, deptcode, regioncode, distcode,instmappingcode) {
             if (!roletypecode) roletypecode = $('#roletypecode').val();
 
             if (!deptcode) deptcode = $('#deptcode').val();
 
-            if ((roletypecode) && ((roletypecode == '<?php echo $Dist_roletypecode; ?>') || (roletypecode == '<?php echo $Re_roletypecode; ?>'))) 
-            {
-                makedropdownempty('instmappingcode', 'Select Insittuion')
-                $('#instdiv').show();
-                getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, 'region', 'regioncode')
-                makedropdownempty('regioncode', 'Select Region')
-                $('#regiondiv').show();
+            // if ((roletypecode) && ((roletypecode == '<?php echo $Dist_roletypecode; ?>') || (roletypecode == '<?php echo $Re_roletypecode; ?>'))) 
+            // {
+            //     if((session_roletypecode == '<?php echo $dga_roletypecode; ?>')||(session_roletypecode == '<?php echo $Ho_roletypecode; ?>'))
+            //     {
+            //         makedropdownempty('regioncode', 'Select Region')
+            //         getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, 'region', 'regioncode')
+            //         $('#regiondiv').show();
 
-                if ((roletypecode == '<?php echo $Dist_roletypecode; ?>')) {
-                    // getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, 'region')
-                    makedropdownempty('distcode', 'Select District')
-                    $('#distdiv').show();
-                } else {
-                    $('#distdiv').hide();
+            //         makedropdownempty('instmappingcode', 'Select Insittuion')
+            //         $('#instdiv').show();
+
+            //         if ((roletypecode == '<?php echo $Dist_roletypecode; ?>')) {
+            //             // getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, 'region')
+            //             makedropdownempty('distcode', 'Select District')
+            //             $('#distdiv').show();
+            //         } else {
+            //             $('#distdiv').hide();
+            //         }
+            //     }
+
+            //     if((session_roletypecode == '<?php echo $Dist_roletypecode; ?>')|| (session_roletypecode == '<?php echo $Re_roletypecode; ?>'))
+            //     {
+            //         makedropdownempty('instmappingcode', 'Select Insittuion')
+            //         $('#instdiv').show();
+
+            //         if((session_roletypecode == '<?php echo $Re_roletypecode; ?>'))
+            //         {
+            //             if(roletypecode == '<?php echo $Re_roletypecode; ?>')
+            //             {
+            //                 getdistregioninst_basedondept(roletypecode, deptcode, regioncode, '', 'institution', 'instmappingcode','')
+            //             }
+            //             else
+            //             {
+            //                 getdistregioninst_basedondept(roletypecode, deptcode, regioncode, '', 'district', 'distcode')
+            //             }
+            //         }
+                       
+            //         }
+            //         if((session_roletypecode == '<?php echo $Dist_roletypecode; ?>'))
+            //         {
+            //             makedropdownempty('instmappingcode', 'Select Insittuion')
+            //             $('#instdiv').show();
+            //             getdistregioninst_basedondept(roletypecode, deptcode, regioncode, '', 'institution', 'instmappingcode','')
+            //         }
+            // }
+            // else {
+            //     $('#distdiv').hide();
+            //     $('#regiondiv').hide();
+            //     $('#instdiv').hide();
+            // } 
+
+            if (
+                roletypecode &&
+                (roletypecode == '<?php echo $Dist_roletypecode; ?>' || roletypecode == '<?php echo $Re_roletypecode; ?>')
+            ) {
+           
+                if (
+                    session_roletypecode == '<?php echo $dga_roletypecode; ?>' ||  session_roletypecode == '<?php echo $Admin_roletypecode; ?>' ||
+                    session_roletypecode == '<?php echo $Ho_roletypecode; ?>'
+                ) {
+                    makedropdownempty('regioncode', 'Select Region');
+                    getdistregioninst_basedondept(roletypecode, deptcode, regioncode, distcode, 'region', 'regioncode');
+                    $('#regiondiv').show();
+
+                    makedropdownempty('instmappingcode', 'Select Institution');
+                    $('#instdiv').show();
+
+                    if (roletypecode == '<?php echo $Dist_roletypecode; ?>') {
+                        makedropdownempty('distcode', 'Select District');
+                        $('#distdiv').show();
+                    } else {
+                        $('#distdiv').hide();
+                    }
                 }
 
+                if (
+                    session_roletypecode == '<?php echo $Dist_roletypecode; ?>' || 
+                    session_roletypecode == '<?php echo $Re_roletypecode; ?>'
+                ) {
+                    makedropdownempty('instmappingcode', 'Select Institution');
+                    $('#instdiv').show();
 
+                    if (session_roletypecode == '<?php echo $Re_roletypecode; ?>') {
+                        if (roletypecode == '<?php echo $Re_roletypecode; ?>') {
+                            getdistregioninst_basedondept(
+                                roletypecode, deptcode, regioncode, distcode, 'institution', 'instmappingcode', instmappingcode
+                            );
+                        } else {
+                            getdistregioninst_basedondept(
+                                roletypecode, deptcode, regioncode, distcode, 'district', 'distcode'
+                            );
+                        }
+                    } else if (session_roletypecode == '<?php echo $Dist_roletypecode; ?>') {
+                        getdistregioninst_basedondept(
+                            roletypecode, deptcode, regioncode, '', 'institution', 'instmappingcode', instmappingcode
+                        );
+                    }
+                }
             } else {
                 $('#distdiv').hide();
                 $('#regiondiv').hide();
                 $('#instdiv').hide();
             }
+
         }
         
 
@@ -329,6 +419,7 @@
                     regioncode,
                     distcode,
                     valuefor,
+                    page : 'createcharge',
                     _token: $('meta[name="csrf-token"]').attr('content') // CSRF token for Laravel
                 },
                 success: function(response) {
@@ -448,6 +539,12 @@
 
                 var formData = $('#chargeform').serializeArray();
 
+                
+                if (
+                    session_roletypecode == '<?php echo $Dist_roletypecode; ?>' || 
+                    session_roletypecode == '<?php echo $Re_roletypecode; ?>'
+                ) 
+
 
                 $.ajax({
                     url: '/charge_insertupdate', // URL where the form data will be posted
@@ -492,12 +589,29 @@
 
         function reset_form() 
         {
-            makedropdownempty('roletypecode', 'Select Role Type')
-            makedropdownempty('instmappingcode', 'Select Insittuion')
-            makedropdownempty('regioncode', 'Select Region')
-            makedropdownempty('distcode', 'Select District')
+            if (
+                session_roletypecode == '<?php echo $Ho_roletypecode; ?>' || 
+                session_roletypecode == '<?php echo $Re_roletypecode; ?>' || 
+                session_roletypecode == '<?php echo $Dist_roletypecode; ?>'
+            ) {
+                makedropdownempty('instmappingcode', 'Select Institution');
+
+                if (session_roletypecode == '<?php echo $Ho_roletypecode; ?>') {
+                    makedropdownempty('regioncode', 'Select Region');
+                    makedropdownempty('distcode', 'Select District');
+                } else if (session_roletypecode == '<?php echo $Re_roletypecode; ?>') {
+                    makedropdownempty('distcode', 'Select District');
+                }
+            } else {
+                $('#chargeform')[0].reset();
+            }
+
+
+            $('#roletypecode').val('');
+            $('chargedescription').val('');
+            $('desigcode').val('');
             $('#display_error').hide();
-            $('#chargeform')[0].reset();
+           
             $('#chargeform').validate().resetForm();
             change_button_as_insert('chargeform', 'action', 'buttonaction', 'display_error', '', '');
             updateSelectColorByValue(document.querySelectorAll(".form-select"));
@@ -564,7 +678,7 @@
             $(document).on('click', '.editchargedel', function () {
                 const id = $(this).attr('id');
                 if (id) {
-                    resetForm();
+                    reset_form();
                     $('#chargeid').val(id);
                     $.ajax({
                         url: '/fetchchargeData',
@@ -597,15 +711,16 @@
             $('#roleactioncode').val(charge.roleactioncode);
             $('#chargedescription').val(charge.chargedescription);
             getroletypecode_basedondept(charge.deptcode, charge.roletypecode);
-            settingform_basedonroletypcode(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode);
+            //settingform_basedonroletypcode(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode,charge.instmappingcode);
 
-            const roletypeCodes = [`<?php echo $Re_roletypecode; ?>`, `<?php echo $Dist_roletypecode; ?>`];
-            if (roletypeCodes.includes(charge.roletypecode)) {
-                if (charge.roletypecode === '<?php echo $Dist_roletypecode; ?>') {
-                    getdistregioninst_basedondept(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode, 'district', 'distcode');
-                }
-                getdistregioninst_basedondept(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode, 'institution', 'instmappingcode', charge.instmappingcode);
-            }
+            // const roletypeCodes = [`<?php echo $Re_roletypecode; ?>`, `<?php echo $Dist_roletypecode; ?>`];
+            // if (roletypeCodes.includes(charge.roletypecode)) {
+            //     if (charge.roletypecode === '<?php echo $Dist_roletypecode; ?>') 
+            //     {
+            //         getdistregioninst_basedondept(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode, 'district', 'distcode');
+            //     }
+            //     getdistregioninst_basedondept(charge.roletypecode, charge.deptcode, charge.regioncode, charge.distcode, 'institution', 'instmappingcode', charge.instmappingcode);
+            // }
             updateSelectColorByValue(document.querySelectorAll(".form-select"));
         }
 

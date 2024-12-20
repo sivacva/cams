@@ -27,11 +27,43 @@ class UserManagementModel extends Model
         ->get();
     }
 
-    public static function deptdetail($tablename = Null)
+    public static function deptdetail($viewname = Null)
     {
-        return DeptModel::where('statusflag', '=', 'Y')
-        ->orderBy('orderid', 'asc')
-        ->get();
+        if(($viewname == 'createcharge')|| ($viewname == 'createuser'))
+        {
+            return DeptModel::where('statusflag', '=', 'Y')
+            ->orderBy('orderid', 'asc')
+            ->get();
+        }
+        else
+        {
+            $chargeData = session('charge');
+            $session_deptcode = $chargeData->deptcode;
+
+            // return DeptModel::where('statusflag', '=', 'Y')
+            // ->orderBy('orderid', 'asc')
+            // ->get();
+
+            $query = DB::table('audit.chargedetails as c')
+            ->distinct()
+            ->select('d.deptcode', 'd.deptelname')
+            ->join('audit.mst_dept as d', 'd.deptcode', '=', 'c.deptcode')
+            ->whereNotNull('c.deptcode')
+            ->whereNotIn('c.chargeid', function ($query) {
+                $query->select('chargeid')->from('audit.userchargedetails')
+                ->where('statusflag','Y');
+            });
+
+            if($session_deptcode)
+            {
+                $query->where('c.deptcode', $session_deptcode);
+            }
+            $results = $query->get();
+
+            return $results;
+
+        }
+        
     }
 
     public static function designationdetail($tablename = Null)
@@ -41,26 +73,49 @@ class UserManagementModel extends Model
         ->get();
     }
 
-    public static function roletypebasedon_sessionroletype($tablename = null, $deptcode, $roletypecode)
+    public static function roletypebasedon_sessionroletype($tablename = null, $deptcode, $roletypecode, $page)
     {
-        $query = DB::table($tablename)
-            ->join('audit.mst_roletype as r', 'r.roletypecode', '=', 'audit.roletypemapping.roletypecode')
-            ->join('audit.mst_dept as d', 'd.deptcode', '=', 'audit.roletypemapping.deptcode')
-            ->select('audit.roletypemapping.roletypecode','r.roletypeelname')
-            ->where( 'r.statusflag','Y');
-
-        if ($roletypecode) {
-            $query->where('roletypemapping.roletypecode', '<=', $roletypecode);
+        if ($page === 'createcharge') {
+            $query = DB::table($tablename)
+                ->join('audit.mst_roletype as r', 'r.roletypecode', '=', 'audit.roletypemapping.roletypecode')
+                ->join('audit.mst_dept as d', 'd.deptcode', '=', 'audit.roletypemapping.deptcode')
+                ->select('audit.roletypemapping.roletypecode', 'r.roletypeelname')
+                ->where('r.statusflag', 'Y');
+    
+            if ($roletypecode) {
+                $query->where('audit.roletypemapping.roletypecode', '<=', $roletypecode);
+            }
+    
+            if ($deptcode) {
+                $query->where('audit.roletypemapping.deptcode', '=', $deptcode);
+            }
+    
+            return $query
+                ->orderBy('audit.roletypemapping.orderid', 'DESC')
+                ->get();
         }
-
-        if ($deptcode) {
-            $query->where('roletypemapping.deptcode', '=', $deptcode);
+    
+        if ($page === 'assigncharge') {
+            return DB::table('audit.chargedetails as c')
+                ->distinct()
+                ->select('r.roletypecode', 'r.roletypeelname')
+                ->join('audit.rolemapping as ro', 'ro.rolemappingid', '=', 'c.rolemappingid')
+                ->join('audit.roletypemapping as rm', 'rm.roletypemappingcode', '=', 'ro.roletypemappingcode')
+                ->join('audit.mst_roletype as r', 'r.roletypecode', '=', 'rm.roletypecode')
+                ->where('r.statusflag', 'Y')
+                ->where('c.deptcode', '=', $deptcode)
+                ->whereNotIn('c.chargeid', function ($query) {
+                    $query->select('chargeid')
+                        ->from('audit.userchargedetails')
+                        ->where('statusflag', 'Y');
+                })
+                ->get();
         }
-
-        return $query
-            ->orderBy('audit.roletypemapping.orderid', 'DESC') // Order by ID descending
-            ->get(); // Fetch all records
+    
+        // Default return if no page matches
+        return collect(); // Empty collection
     }
+    
 
 
     public static function getRegionDistrictInstDelBasedOnDept(
@@ -69,7 +124,8 @@ class UserManagementModel extends Model
         ?string $regioncode = null,
         ?string $distcode = null,
         string $getval,
-        string $roletypecode
+        string $roletypecode,
+        string $page
     ) {
         // Validate required parameters
         if (empty($tablename) || empty($deptcode) || empty($getval)) {
@@ -86,9 +142,20 @@ class UserManagementModel extends Model
             case 'region':
                 $query->join('audit.mst_region as re', 're.regioncode', '=', "$tablename.regioncode")
                       ->select("$tablename.regioncode", 're.regionename')
-                      ->distinct()
-                      ->orderBy("re.regionename", 'ASC');
+                      ->distinct();
+            
+                if ($page === 'assigncharge') {
+                    $query->join('audit.chargedetails as c', 'c.regioncode', '=', 're.regioncode')
+                          ->whereNotIn('c.chargeid', function ($subQuery) {
+                              $subQuery->select('chargeid')
+                                       ->from('audit.userchargedetails')
+                                       ->where('statusflag', 'Y');
+                          });
+                }
+            
+                $query->orderBy('re.regionename', 'ASC');
                 break;
+            
 
             case 'district':
                 $query->join('audit.mst_region as re', 're.regioncode', '=', "$tablename.regioncode")
@@ -164,7 +231,7 @@ class UserManagementModel extends Model
 			
 
 			// Remove unwanted fields and add rolemappingid
-			unset($data['roleactioncode'], $data['roletypecode'], $data['deptcode']);
+			unset($data['roleactioncode'], $data['roletypecode']);
 			$data['rolemappingid'] = $rolemappingid;
 
 			// Insert or update the record based on chargeid
@@ -174,7 +241,8 @@ class UserManagementModel extends Model
 					throw new \Exception('Failed to update the record.');
 				}
 			} else {
-				$newRecordId = DB::table($table)->insertGetId($data);
+				$newRecordId = DB::table($table)->insertGetId($data, 'chargeid');
+
 				if (!$newRecordId) {
 					throw new \Exception('Failed to insert the new record.');
 				}
@@ -186,12 +254,105 @@ class UserManagementModel extends Model
 		}
 	}
 
+    public static function getDesignationFromChargeDetails($table, $data)
+    {
+        $query = DB::table('audit.chargedetails as c')
+            ->distinct()
+            ->select('d.desigcode', 'd.desigelname')
+            ->join("$table as d", 'd.desigcode', '=', 'c.desigcode')
+            ->where('c.statusflag', 'Y');
+    
+        // Apply role type-based filtering
+        $hoRoleTypeCode = View::shared('Ho_roletypecode');
+        $reRoleTypeCode = View::shared('Re_roletypecode');
+        $distRoleTypeCode = View::shared('Dist_roletypecode');
+    
+        if (in_array($data['roletypecode'], [$hoRoleTypeCode, $reRoleTypeCode, $distRoleTypeCode])) {
+            $query->where('c.deptcode', $data['deptcode']);
+    
+            if (in_array($data['roletypecode'], [$reRoleTypeCode, $distRoleTypeCode])) {
+                $query->where('c.regioncode', $data['regioncode']);
+    
+                if ($data['roletypecode'] === $distRoleTypeCode) {
+                    $query->where('c.distcode', $data['distcode']);
+                }
+            }
+        }
+    
+        // Exclude records that are already in userchargedetails
+        $query->whereNotIn('c.chargeid', function ($subQuery) {
+            $subQuery->select('chargeid')
+                ->from('audit.userchargedetails')
+                ->where('statusflag', 'Y');
+        });
+    
+        return $query->get();
+    }
+
+    public static function getchargedescription($table, $data)
+    {
+        $query = DB::table('audit.chargedetails as c')
+        ->select('c.chargeid', 'c.chargedescription')
+        ->where('c.statusflag', 'Y');
+
+        // Apply role type-based filtering
+        $hoRoleTypeCode = View::shared('Ho_roletypecode');
+        $reRoleTypeCode = View::shared('Re_roletypecode');
+        $distRoleTypeCode = View::shared('Dist_roletypecode');
+
+        $query->where('c.desigcode', $data['desigcode']);
+
+        if (in_array($data['roletypecode'], [$hoRoleTypeCode, $reRoleTypeCode, $distRoleTypeCode])) {
+            $query->where('c.deptcode', $data['deptcode']);
+
+            if (in_array($data['roletypecode'], [$reRoleTypeCode, $distRoleTypeCode])) {
+                $query->where('c.regioncode', $data['regioncode']);
+
+                if ($data['roletypecode'] === $distRoleTypeCode) {
+                    $query->where('c.distcode', $data['distcode']);
+                }
+            }
+        }
+
+        // Exclude records that are already in userchargedetails
+        $query->whereNotIn('c.chargeid', function ($subQuery) {
+            $subQuery->select('chargeid')
+                ->from('audit.userchargedetails')
+                ->where('statusflag', 'Y');
+        });
+
+        return $query->get();
+    }
+
+    public static function getuserbasedonroletype($table, $data)
+    {
+        return DB::table("{$table} as u")
+        ->select('u.deptuserid', 'u.username')
+        ->where('u.statusflag', 'Y')
+        ->whereNotIn('u.deptuserid', function ($subQuery) {
+            $subQuery->from('audit.userchargedetails')
+                ->select('userid')
+                ->where('statusflag', 'Y');
+        })
+        ->get();
+    
+
+    }
+    
+
 
 
 	public static function fetchchargeData($chargeid = null, $table)
 	{
+        $sessiondetails =   session('charge');
+        $sessionroletypecode    =   $sessiondetails->roletypecode;
+        $sessiondeptcode   =   $sessiondetails->deptcode;
+        $sessionregioncode    =   $sessiondetails->regioncode;
+        $sessiondistcode    =   $sessiondetails->distcode;
+
+
 		// Build the query and apply the 'chargeid' condition if it's provided
-		return DB::table($table)
+		$query  =  DB::table($table)
 			->join("audit.rolemapping as rm", "rm.rolemappingid", '=', "$table.rolemappingid")
 			->join("audit.mst_roleaction as ra", "rm.roleactioncode", '=', "ra.roleactioncode")
 			->join("audit.roletypemapping as rtm", "rtm.roletypemappingcode", '=', "rm.roletypemappingcode")
@@ -204,12 +365,23 @@ class UserManagementModel extends Model
 			
 			->select("rt.roletypecode",'rt.roletypeelname',"ra.roleactioncode",'ra.roleactionelname',
 			'r.regionename',"$table.regioncode","$table.distcode",'di.distename',"$table.instmappingcode",'ins.instename',
-			'd.deptesname',"$table.deptcode","$table.desigcode",'des.desigesname',"$table.chargedescription","$table.chargeid")
-			
-			->when($chargeid, function ($query) use ($chargeid) {
+			'd.deptesname',"$table.deptcode","$table.desigcode",'des.desigesname',"$table.chargedescription","$table.chargeid");
+
+            if(($sessionroletypecode ==  View::shared('Ho_roletypecode')) || ($sessionroletypecode ==  View::shared('Re_roletypecode')) || ($sessionroletypecode ==  View::shared('Dist_roletypecode')))
+            {
+                $query->where("$table.deptcode", $sessiondeptcode);
+                if(($sessionroletypecode ==  View::shared('Re_roletypecode')) || ($sessionroletypecode ==  View::shared('Dist_roletypecode')))
+                {
+                    $query->where("$table.regioncode", $sessionregioncode);
+                    if(($sessionroletypecode ==  View::shared('Dist_roletypecode')))
+                    $query->where("$table.distcode", $sessiondistcode);
+                }
+            }
+			$query->when($chargeid, function ($query) use ($chargeid) {
 				$query->where('chargeid', $chargeid);
-			})
-			->get(); // Return the results directly
+			});
+			// Return the results directly
+            return $query->get();
 	}
 
 

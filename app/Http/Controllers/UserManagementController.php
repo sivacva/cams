@@ -18,7 +18,7 @@ class UserManagementController extends Controller
     public function creatuser_dropdownvalues($viewname)
     {
         $roleaction     =   UserManagementModel::roleactiondetail('audit.mst_roleaction');
-        $dept           =   UserManagementModel::deptdetail();
+        $dept           =   UserManagementModel::deptdetail($viewname);
         $designation    =   UserManagementModel::designationdetail();
 
         $chargeData = session('charge');
@@ -52,7 +52,7 @@ class UserManagementController extends Controller
 
         if($session_deptcode)
         {
-            $roletype       =   UserManagementModel::roletypebasedon_sessionroletype('audit.roletypemapping',$session_deptcode, $session_roletypecode);
+            $roletype       =   UserManagementModel::roletypebasedon_sessionroletype('audit.roletypemapping',$session_deptcode, $session_roletypecode,'createcharge');
         }
         else    $roletype   =   '';
 
@@ -280,14 +280,31 @@ class UserManagementController extends Controller
                 'desigcode'         => 'required|string|regex:/^\d+$/',
             ]);
 
+            $deptcode   =   $request->deptcode;
+            $regioncode =   $request->regioncode;
+            $distcode   =   $request->distcode;
+            $instmappingcode    =   $request->instmappingcode;
+
+            
+
+            if( in_array($chargedel->roletypecode, [View::shared('Re_roletypecode'),View::shared('Ho_roletypecode'), View::shared('Dist_roletypecode')])) 
+            {
+                $deptcode   =   $chargedel->deptcode;
+                if(in_array($chargedel->roletypecode, [View::shared('Re_roletypecode'),View::shared('Dist_roletypecode')])) 
+                    $regioncode =   $chargedel->regioncode;
+                if($chargedel->roletypecode == View::shared('Dist_roletypecode'))
+                    $distcode =   $chargedel->distcode;
+            }
+
+
         
             // Prepare data for insertion or update
             $data = array_merge($validatedData, [
                 'statusflag' => 'Y',
-                'deptcode'   => $request->deptcode ?? null,
-                'regioncode' => $request->regioncode ?? null,
-                'distcode'   => $request->distcode ?? null,
-                'instmappingcode' => $request->instmappingcode ?? null,
+                'deptcode'   => $deptcode ?? null,
+                'regioncode' => $regioncode ?? null,
+                'distcode'   => $distcode ?? null,
+                'instmappingcode' => $instmappingcode ?? null,
             ]);
         
             if ($request->input('action') === 'insert') {
@@ -308,6 +325,7 @@ class UserManagementController extends Controller
         public function getroletypecode_basedondept(Request $request)
         {
             $deptcode   =   $_REQUEST['deptcode'];
+            $page       =   $_REQUEST['page']; 
 
             $request->validate([
                 'deptcode'  =>  ['required', 'string', 'regex:/^\d+$/'],
@@ -317,7 +335,7 @@ class UserManagementController extends Controller
             ]);
 
             // Fetch user data based on deptuserid
-            $roletypedel = UserManagementModel::roletypebasedon_sessionroletype('audit.roletypemapping',$deptcode,''); // Adjust query as needed
+            $roletypedel = UserManagementModel::roletypebasedon_sessionroletype('audit.roletypemapping',$deptcode,'',$page); // Adjust query as needed
 
             if ($roletypedel) {
                 return response()->json(['success' => true, 'data' => $roletypedel]);
@@ -328,6 +346,7 @@ class UserManagementController extends Controller
 
         public function getRegionDistInstBasedOnDept(Request $request)
         {
+            $page = $request->input('page');
             // Validate incoming request
             $validatedData = $request->validate([
                 'deptcode'      => ['required', 'string', 'regex:/^\d+$/'],
@@ -376,7 +395,8 @@ class UserManagementController extends Controller
                     $regioncode,
                     $distcode,
                     $valuefor,
-                    $roletypecode
+                    $roletypecode,
+                    $page
                 );
         
                 if ($roletypedel) {
@@ -414,6 +434,89 @@ class UserManagementController extends Controller
         
         
     /******************************************** Charge Details - Form **************************************************/
+
+
+        public function getdesignation_fromchargedet(Request $request)
+        {
+            $request->validate([
+                'deptcode'  =>  ['required', 'string', 'regex:/^\d+$/'],
+                'roletypecode'  =>  ['required', 'string', 'regex:/^\d+$/'],
+            ], [
+                'required' => 'The :attribute field is required.',
+                'regex'     =>  'The :attribute field must be a valid number.',
+            ]);
+
+            $data   =   array(
+                'deptcode'  =>     $_REQUEST['deptcode'],
+                'roletypecode'  =>     $_REQUEST['roletypecode'],
+                'regioncode'  =>     $_REQUEST['regioncode'],
+                'distcode'  =>     $_REQUEST['distcode'],
+                'instmappingcode'  =>     $_REQUEST['instmappingcode']
+            );
+
+
+            // Fetch user data based on deptuserid
+            $roletypedel = UserManagementModel::getDesignationFromChargeDetails('audit.mst_designation',$data); // Adjust query as needed
+
+            if ($roletypedel) {
+                return response()->json(['success' => true, 'data' => $roletypedel]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            }
+        }
+
+
+        public function getchargedescription(Request $request)
+        {
+            $request->validate([
+                'deptcode'  =>  ['required', 'string', 'regex:/^\d+$/'],
+                'roletypecode'  =>  ['required', 'string', 'regex:/^\d+$/'],
+                'desigcode'     =>  ['required', 'string', 'regex:/^\d+$/']
+            ], [
+                'required' => 'The :attribute field is required.',
+                'regex'     =>  'The :attribute field must be a valid number.',
+            ]);
+
+            $data   =   array(
+                'deptcode'  =>     $_REQUEST['deptcode'],
+                'roletypecode'  =>     $_REQUEST['roletypecode'],
+                'regioncode'  =>     $_REQUEST['regioncode'],
+                'distcode'  =>     $_REQUEST['distcode'],
+                'instmappingcode'  =>     $_REQUEST['instmappingcode'],
+                'desigcode'         =>  $_REQUEST['desigcode']
+            );
+
+            $roletypedel = UserManagementModel::getchargedescription('audit.mst_charge',$data); // Adjust query as needed
+
+            if ($roletypedel) {
+                return response()->json(['success' => true, 'data' => $roletypedel]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            }
+        }
+
+
+        public function getuserbasedonroletype(Request $request)
+        {
+            $request->validate([
+                'roletypecode'  =>  ['required', 'string', 'regex:/^\d+$/'],
+            ], [
+                'required' => 'The :attribute field is required.',
+                'regex'     =>  'The :attribute field must be a valid number.',
+            ]);
+
+            $data   =   array(
+                'roletypecode'  =>     $_REQUEST['roletypecode'],
+            );
+
+            $roletypedel = UserManagementModel::getuserbasedonroletype('audit.deptuserdetails',$data); // Adjust query as needed
+
+            if ($roletypedel) {
+                return response()->json(['success' => true, 'data' => $roletypedel]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            }
+        }
 
 
 }

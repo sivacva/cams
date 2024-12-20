@@ -43,13 +43,11 @@ Route::get('/header', function () {
 Route::get('/sidenav', function () {
     return view('layouts.dash_sidebar');
 });
-Route::get('/create_user', function () {
-    return view('usermanagement.createuser');
-});
+// Route::get('/create_user', function () {
+//     return view('usermanagement.createuser');
+// });
 
-Route::get('/assign_charge', function () {
-    return view('usermanagement/assigncharge');
-});
+
 Route::get('/privileges', function () {
     return view('privileges/privileges');
 });
@@ -165,6 +163,16 @@ Route::middleware('check.session')->group(function () {
 
     /********************************************************************* Create charge - URL ******************************************************************* */
 
+
+    Route::get('/assign_charge', [App\Http\Controllers\UserManagementController::class, 'creatuser_dropdownvalues'])->name('assign_charge')->defaults('viewName', 'usermanagement.assigncharge');
+    Route::post('/getdesignation_fromchargedet', [App\Http\Controllers\UserManagementController::class, 'getdesignation_fromchargedet'])->name('UserManagementController.getdesignation_fromchargedet');
+    Route::post('/getchargedescription', [App\Http\Controllers\UserManagementController::class, 'getchargedescription'])->name('UserManagementController.getchargedescription');
+
+    Route::post('/getuserbasedonroletype', [App\Http\Controllers\UserManagementController::class, 'getuserbasedonroletype'])->name('UserManagementController.getuserbasedonroletype');
+
+
+
+    
 
     /********************************************************************* Audit Team - URL ******************************************************************* */
 
